@@ -33,6 +33,13 @@ struct ComposeDraftAdapter {
         )
     }
 
+    func updateBody(plainBody: String, htmlBody: String?) {
+        guard var updated = model.composeDraft else { return }
+        updated.plainBody = plainBody
+        updated.htmlBody = htmlBody
+        model.updateCompose(updated)
+    }
+
     private static func participants(from value: String) -> [MailParticipant] {
         value
             .split(separator: ",")
@@ -187,15 +194,16 @@ struct FloatingComposeView: View {
             Divider()
 
             // Body
-            TextEditor(text: adapter.binding(\.plainBody))
-                .font(.system(size: 13))
-                .foregroundStyle(MailDesignTokens.textPrimary)
-                .scrollContentBackground(.hidden)
-                .frame(minHeight: 120)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .focused($focusedField, equals: .body)
-                .accessibilityIdentifier("compose-body")
+            ComposeBodyEditor(
+                model: model,
+                draft: currentDraft,
+                minHeight: 140,
+                maxHeight: nil,
+                autoFocus: focusedField == .body
+            )
+            .padding(.horizontal, 8)
+            .padding(.vertical, 8)
+            .accessibilityIdentifier("compose-body")
 
             Divider()
 
@@ -246,5 +254,136 @@ struct FloatingComposeView: View {
                 focusedField = .body
             }
         }
+    }
+}
+
+struct ComposeBodyEditor: View {
+    @Bindable var model: WindowModel
+    let draft: OutgoingDraft
+    let minHeight: CGFloat
+    let maxHeight: CGFloat?
+    let autoFocus: Bool
+
+    private var adapter: ComposeDraftAdapter { ComposeDraftAdapter(model: model, fallbackDraft: draft) }
+    private var currentDraft: OutgoingDraft { adapter.draft }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Group {
+                if let maxHeight {
+                    RichComposeEditor(
+                        plainText: currentDraft.plainBody,
+                        htmlText: currentDraft.htmlBody,
+                        autoFocus: autoFocus
+                    ) { plainText, htmlText in
+                        adapter.updateBody(plainBody: plainText, htmlBody: htmlText)
+                    }
+                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: minHeight, maxHeight: maxHeight, alignment: .topLeading)
+                } else {
+                    RichComposeEditor(
+                        plainText: currentDraft.plainBody,
+                        htmlText: currentDraft.htmlBody,
+                        autoFocus: autoFocus
+                    ) { plainText, htmlText in
+                        adapter.updateBody(plainBody: plainText, htmlBody: htmlText)
+                    }
+                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: minHeight, maxHeight: .infinity, alignment: .topLeading)
+                }
+            }
+
+            if let quotedReply = currentDraft.quotedReply {
+                DraftQuotedReplyDisclosure(quotedReply: quotedReply)
+            }
+        }
+    }
+}
+
+private struct DraftQuotedReplyDisclosure: View {
+    let quotedReply: DraftQuotedReply
+
+    @State private var isExpanded = false
+    @State private var htmlContentHeight: CGFloat = 1
+    @AppStorage(AppPreferences.loadRemoteImagesKey)
+    private var loadRemoteImagesAutomatically = AppPreferences.loadRemoteImagesByDefault
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Button {
+                withAnimation(.easeInOut(duration: 0.18)) {
+                    isExpanded.toggle()
+                }
+            } label: {
+                if isExpanded {
+                    HStack(spacing: 8) {
+                        Image(systemName: "ellipsis")
+                            .font(.system(size: 11, weight: .semibold))
+                        Text(quotedHeader)
+                            .font(.system(size: 12, weight: .medium))
+                            .lineLimit(1)
+                        Spacer()
+                        Image(systemName: "chevron.up")
+                            .font(.system(size: 10, weight: .semibold))
+                    }
+                    .foregroundStyle(MailDesignTokens.textSecondary)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 8)
+                    .background(MailDesignTokens.surfaceMuted)
+                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                } else {
+                    HStack(spacing: 12) {
+                        Rectangle()
+                            .fill(MailDesignTokens.border)
+                            .frame(height: 1)
+                        Text("...")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(MailDesignTokens.textSecondary)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(MailDesignTokens.surfaceMuted)
+                            .clipShape(Capsule())
+                        Rectangle()
+                            .fill(MailDesignTokens.border)
+                            .frame(height: 1)
+                    }
+                }
+            }
+            .buttonStyle(.plain)
+
+            if isExpanded {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(quotedHeader)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(MailDesignTokens.textSecondary)
+
+                    if let htmlBody = quotedReply.htmlBody, htmlBody.isEmpty == false {
+                        HTMLMessageView(
+                            htmlBody: htmlBody,
+                            allowsRemoteContent: loadRemoteImagesAutomatically,
+                            contentHeight: $htmlContentHeight
+                        )
+                        .frame(height: htmlContentHeight)
+                    } else if let plainBody = quotedReply.plainBody, plainBody.isEmpty == false {
+                        PlainTextMessageView(text: plainBody)
+                    }
+                }
+                .padding(.leading, 14)
+                .overlay(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 1.5, style: .continuous)
+                        .fill(MailDesignTokens.border)
+                        .frame(width: 3)
+                }
+            }
+        }
+    }
+
+    private var quotedHeader: String {
+        var header = "On "
+        if let sentAt = quotedReply.sentAt {
+            header += sentAt.formatted(.dateTime.year().month().day().hour().minute())
+        } else {
+            header += "an earlier message"
+        }
+        header += ", \(quotedReply.sender.displayName) <\(quotedReply.sender.emailAddress)> wrote"
+        return header
     }
 }

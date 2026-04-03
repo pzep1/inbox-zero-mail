@@ -192,6 +192,44 @@ func replyComposePrefillsSubjectAndRecipientFromFocusedThread() async throws {
 
 @Test
 @MainActor
+func replyComposeStoresQuotedReplyOutsideEditableBody() async throws {
+    let account = makeAccount()
+    let thread = makeThread(accountID: account.id)
+    let message = MailMessage(
+        id: MailMessageID(accountID: account.id, providerMessageID: "message-quoted"),
+        threadID: thread.id,
+        accountID: account.id,
+        providerMessageID: "message-quoted",
+        sender: MailParticipant(name: "Sender", emailAddress: "sender@example.com"),
+        toRecipients: [MailParticipant(name: "Alpha", emailAddress: "alpha@example.com")],
+        sentAt: .now,
+        receivedAt: .now,
+        snippet: "Snippet fallback",
+        plainBody: "Original reply body",
+        htmlBody: "<p><strong>Original</strong> reply body</p>",
+        bodyCacheState: .hot,
+        headers: [MessageHeader(name: "Subject", value: thread.subject)],
+        mailboxRefs: [],
+        isRead: false,
+        isOutgoing: false
+    )
+    let detail = MailThreadDetail(thread: thread, messages: [message])
+    let model = makeWindowModel(workspace: StubWorkspace(accounts: [account], threads: [thread], detail: detail))
+
+    await model.store.reloadSharedData(reason: .initial)
+    await model.reloadThreads()
+    model.open(threadID: thread.id)
+    try await Task.sleep(for: .milliseconds(50))
+    model.openCompose(replyMode: .reply)
+
+    #expect(model.composeDraft?.plainBody.contains("Original reply body") == false)
+    #expect(model.composeDraft?.quotedReply?.sender.emailAddress == "sender@example.com")
+    #expect(model.composeDraft?.quotedReply?.plainBody == "Original reply body")
+    #expect(model.composeDraft?.quotedReply?.htmlBody == "<p><strong>Original</strong> reply body</p>")
+}
+
+@Test
+@MainActor
 func openingUnreadThreadMarksItReadOptimistically() async throws {
     let account = makeAccount()
     let thread = makeThread(accountID: account.id)

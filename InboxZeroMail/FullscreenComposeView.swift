@@ -9,7 +9,6 @@ struct FullscreenComposeView: View {
 
     @State private var showCC = false
     @State private var showBCC = false
-    @FocusState private var isBodyFocused: Bool
 
     private var adapter: ComposeDraftAdapter { ComposeDraftAdapter(model: model, fallbackDraft: draft) }
     private var currentDraft: OutgoingDraft { adapter.draft }
@@ -131,14 +130,16 @@ struct FullscreenComposeView: View {
             Divider()
 
             // Body
-            TextEditor(text: adapter.binding(\.plainBody))
-                .font(.system(size: 13))
-                .foregroundStyle(MailDesignTokens.textPrimary)
-                .scrollContentBackground(.hidden)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .focused($isBodyFocused)
-                .accessibilityIdentifier("compose-body")
+            ComposeBodyEditor(
+                model: model,
+                draft: currentDraft,
+                minHeight: 260,
+                maxHeight: nil,
+                autoFocus: true
+            )
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .accessibilityIdentifier("compose-body")
 
             Divider()
 
@@ -179,7 +180,6 @@ struct FullscreenComposeView: View {
         .onAppear {
             if !currentDraft.ccRecipients.isEmpty { showCC = true }
             if !currentDraft.bccRecipients.isEmpty { showBCC = true }
-            isBodyFocused = true
         }
     }
 }

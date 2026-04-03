@@ -107,6 +107,36 @@ func gmailEmulatorContractCoversSyncMutationsAndSend() async throws {
     #expect(receipt.providerMessageID.isEmpty == false)
 }
 
+@Test
+func gmailMimeBuilderIncludesPlainHtmlAndQuotedReplySections() {
+    let draft = OutgoingDraft(
+        accountID: MailAccountID(rawValue: "gmail:test@example.com"),
+        replyMode: .reply,
+        toRecipients: [MailParticipant(name: "Customer", emailAddress: "customer@example.com")],
+        subject: "Re: Rich reply",
+        plainBody: "Hello there",
+        htmlBody: "<p><strong>Hello</strong> there</p>",
+        quotedReply: DraftQuotedReply(
+            subject: "Rich reply",
+            sender: MailParticipant(name: "Customer", emailAddress: "customer@example.com"),
+            sentAt: Date(timeIntervalSince1970: 1_700_000_000),
+            plainBody: "Quoted text",
+            htmlBody: "<div>Quoted <em>HTML</em></div>"
+        )
+    )
+
+    let rawMessage = GmailMIMEBuilder.makeRawMessage(from: draft, fromEmail: "me@example.com")
+    let decoded = String(data: Data(base64URLEncoded: rawMessage)!, encoding: .utf8)!
+
+    #expect(decoded.contains("Content-Type: multipart/alternative"))
+    #expect(decoded.contains("Content-Type: text/plain; charset=utf-8"))
+    #expect(decoded.contains("Content-Type: text/html; charset=utf-8"))
+    #expect(decoded.contains("Hello there"))
+    #expect(decoded.contains("Quoted text"))
+    #expect(decoded.contains("<strong>Hello</strong>"))
+    #expect(decoded.contains("<blockquote"))
+}
+
 private var emulatorTestsEnabled: Bool {
     ProcessInfo.processInfo.environment["INBOX_ZERO_RUN_EMULATOR_TESTS"] == "1"
 }
