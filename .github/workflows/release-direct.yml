@@ -97,17 +97,65 @@ jobs:
           set -euo pipefail
           archive_path="$RUNNER_TEMP/${APP_NAME}.xcarchive"
           app_path="$archive_path/Products/Applications/${APP_NAME}.app"
+          sparkle_framework_path="$app_path/Contents/Frameworks/Sparkle.framework"
           version="${GITHUB_REF_NAME#v}"
           unstapled_zip="$RUNNER_TEMP/${APP_NAME}-${version}-unstapled.zip"
           final_zip="$RUNNER_TEMP/${APP_NAME}-${version}.zip"
+          notary_key_path="$RUNNER_TEMP/notary/AuthKey_${APPLE_API_KEY_ID}.p8"
+          signing_identity="$(security find-identity -v -p codesigning | sed -n 's/.*\"\\(Developer ID Application:.*\\)\"/\\1/p' | head -n1)"
+
+          if [[ -z "$signing_identity" ]]; then
+            echo "Developer ID identity not found in keychain."
+            exit 1
+          fi
+
+          resign() {
+            local path="$1"
+            /usr/bin/codesign \
+              --force \
+              --sign "$signing_identity" \
+              --timestamp \
+              --options runtime \
+              --preserve-metadata=identifier,entitlements,requirements,flags \
+              "$path"
+          }
+
+          # Sparkle ships pre-signed nested helpers. Re-sign them with our Developer ID
+          # identity so notarization sees a consistent certificate chain and timestamp.
+          if [[ -d "$sparkle_framework_path" ]]; then
+            while IFS= read -r path; do
+              resign "$path"
+            done < <(find "$sparkle_framework_path" -type d \( -name '*.xpc' -o -name 'Updater.app' \) | sort)
+
+            while IFS= read -r path; do
+              resign "$path"
+            done < <(find "$sparkle_framework_path" -type f -name 'Autoupdate' | sort)
+
+            resign "$sparkle_framework_path"
+          fi
+
+          resign "$app_path"
+          /usr/bin/codesign --verify --deep --strict --verbose=2 "$app_path"
 
           /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$app_path" "$unstapled_zip"
 
-          xcrun notarytool submit "$unstapled_zip" \
-            --key "$RUNNER_TEMP/notary/AuthKey_${APPLE_API_KEY_ID}.p8" \
+          notary_output="$(xcrun notarytool submit "$unstapled_zip" \
+            --key "$notary_key_path" \
             --key-id "$APPLE_API_KEY_ID" \
             --issuer "$APPLE_API_ISSUER_ID" \
-            --wait
+            --wait \
+            --output-format json)"
+          echo "$notary_output"
+
+          notary_id="$(printf '%s' "$notary_output" | python3 -c 'import json,sys; print(json.load(sys.stdin)["id"])')"
+          notary_status="$(printf '%s' "$notary_output" | python3 -c 'import json,sys; print(json.load(sys.stdin)["status"])')"
+          if [[ "$notary_status" != "Accepted" ]]; then
+            xcrun notarytool log "$notary_id" \
+              --key "$notary_key_path" \
+              --key-id "$APPLE_API_KEY_ID" \
+              --issuer "$APPLE_API_ISSUER_ID"
+            exit 1
+          fi
 
           xcrun stapler staple -v "$app_path"
           xcrun stapler validate "$app_path"
