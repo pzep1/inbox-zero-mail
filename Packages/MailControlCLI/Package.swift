@@ -17,5 +17,8 @@ let package = Package(
         .executableTarget(
             name: "MailControlCLI"
         ),
+        .testTarget(
+            name: "MailControlCLITests"
+        ),
     ]
 )
