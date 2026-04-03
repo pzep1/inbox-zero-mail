@@ -78,6 +78,7 @@ jobs:
             -configuration Release \
             -destination "platform=macOS" \
             -archivePath "$archive_path" \
+            DEVELOPMENT_TEAM=Z46U4K6CNL \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Developer ID Application" \
             INBOX_ZERO_GMAIL_CLIENT_ID="$INBOX_ZERO_GMAIL_CLIENT_ID" \
