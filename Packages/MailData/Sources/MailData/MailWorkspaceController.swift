@@ -256,7 +256,7 @@ public actor MailWorkspaceController: MailWorkspace {
 
         do {
             let providerDraft = try await provider.saveDraft(session: session, draft: resolvedDraft)
-            try await store.saveDraft(providerDraft)
+            try await store.saveDraft(preservingLocalDraftFields(from: resolvedDraft, into: providerDraft))
         } catch let error as MailProviderError {
             if case .unsupported = error {
                 try await store.saveDraft(resolvedDraft)
@@ -291,9 +291,7 @@ public actor MailWorkspaceController: MailWorkspace {
                         return remoteDraft
                     }
 
-                    var preserved = remoteDraft
-                    preserved.id = cached.id
-                    return preserved
+                    return preservingLocalDraftFields(from: cached, into: remoteDraft)
                 }
 
                 let remoteProviderDraftIDs = Set(normalizedRemoteDrafts.compactMap(\.providerDraftID))
@@ -401,6 +399,16 @@ public actor MailWorkspaceController: MailWorkspace {
             }
         }
         return false
+    }
+}
+
+private extension MailWorkspaceController {
+    func preservingLocalDraftFields(from localDraft: OutgoingDraft, into remoteDraft: OutgoingDraft) -> OutgoingDraft {
+        var preserved = remoteDraft
+        preserved.id = localDraft.id
+        preserved.htmlBody = localDraft.htmlBody ?? remoteDraft.htmlBody
+        preserved.quotedReply = localDraft.quotedReply
+        return preserved
     }
 }
 

@@ -773,13 +773,15 @@ public final class WindowModel {
         if !sig.isEmpty {
             body += "\n\n--\n\(sig)"
         }
+        let quotedReply: DraftQuotedReply?
         switch replyMode {
         case .reply, .replyAll:
-            body += replyQuotedBody()
+            quotedReply = replyQuotedMessage()
         case .forward:
             body += forwardBody()
+            quotedReply = nil
         case .new:
-            break
+            quotedReply = nil
         }
         let threadID: MailThreadID?
         switch replyMode {
@@ -795,7 +797,8 @@ public final class WindowModel {
             threadID: threadID,
             toRecipients: toRecipients,
             subject: replySubject(for: replyMode),
-            plainBody: body
+            plainBody: body,
+            quotedReply: quotedReply
         )
         composeDraft = draft
 
@@ -1412,20 +1415,15 @@ private extension WindowModel {
         return body
     }
 
-    func replyQuotedBody() -> String {
-        guard let detail = selectedThreadDetail, let lastMessage = detail.messages.last else { return "" }
-        let originalText = lastMessage.plainBody ?? lastMessage.snippet
-        let quoted = originalText
-            .split(separator: "\n", omittingEmptySubsequences: false)
-            .map { "> \($0)" }
-            .joined(separator: "\n")
-
-        var header = "\n\nOn "
-        if let date = lastMessage.sentAt {
-            header += date.formatted(.dateTime.year().month().day().hour().minute())
-        }
-        header += ", \(lastMessage.sender.displayName) <\(lastMessage.sender.emailAddress)> wrote:\n"
-        return header + quoted
+    func replyQuotedMessage() -> DraftQuotedReply? {
+        guard let detail = selectedThreadDetail, let lastMessage = detail.messages.last else { return nil }
+        return DraftQuotedReply(
+            subject: detail.thread.subject,
+            sender: lastMessage.sender,
+            sentAt: lastMessage.sentAt,
+            plainBody: lastMessage.plainBody ?? lastMessage.snippet,
+            htmlBody: lastMessage.htmlBody
+        )
     }
 
     func signature(for accountID: MailAccountID) -> String {

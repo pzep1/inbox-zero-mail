@@ -7,8 +7,6 @@ struct InlineComposeView: View {
     @Bindable var model: WindowModel
     let draft: OutgoingDraft
 
-    @FocusState private var isBodyFocused: Bool
-
     private var adapter: ComposeDraftAdapter { ComposeDraftAdapter(model: model, fallbackDraft: draft) }
     private var currentDraft: OutgoingDraft { adapter.draft }
 
@@ -62,14 +60,14 @@ struct InlineComposeView: View {
                 }
                 .padding(.bottom, 8)
 
-                // Body editor
-                TextEditor(text: adapter.binding(\.plainBody))
-                    .font(.system(size: 13))
-                    .foregroundStyle(MailDesignTokens.textPrimary)
-                    .scrollContentBackground(.hidden)
-                    .frame(minHeight: 120, maxHeight: 300)
-                    .focused($isBodyFocused)
-                    .accessibilityIdentifier("compose-body")
+                ComposeBodyEditor(
+                    model: model,
+                    draft: currentDraft,
+                    minHeight: 140,
+                    maxHeight: 360,
+                    autoFocus: true
+                )
+                .accessibilityIdentifier("compose-body")
 
                 Divider()
                     .padding(.vertical, 8)
@@ -111,9 +109,6 @@ struct InlineComposeView: View {
             )
             .padding(.horizontal, 24)
             .padding(.vertical, 16)
-        }
-        .onAppear {
-            isBodyFocused = true
         }
     }
 }

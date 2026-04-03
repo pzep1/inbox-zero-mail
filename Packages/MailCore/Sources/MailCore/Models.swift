@@ -567,6 +567,28 @@ public enum ReplyMode: String, Codable, Hashable, Sendable {
     case forward
 }
 
+public struct DraftQuotedReply: Codable, Hashable, Sendable {
+    public var subject: String
+    public var sender: MailParticipant
+    public var sentAt: Date?
+    public var plainBody: String?
+    public var htmlBody: String?
+
+    public init(
+        subject: String,
+        sender: MailParticipant,
+        sentAt: Date? = nil,
+        plainBody: String? = nil,
+        htmlBody: String? = nil
+    ) {
+        self.subject = subject
+        self.sender = sender
+        self.sentAt = sentAt
+        self.plainBody = plainBody
+        self.htmlBody = htmlBody
+    }
+}
+
 public struct OutgoingDraft: Codable, Hashable, Sendable, Identifiable {
     public var id: UUID
     public var accountID: MailAccountID
@@ -579,6 +601,8 @@ public struct OutgoingDraft: Codable, Hashable, Sendable, Identifiable {
     public var bccRecipients: [MailParticipant]
     public var subject: String
     public var plainBody: String
+    public var htmlBody: String?
+    public var quotedReply: DraftQuotedReply?
     public var updatedAt: Date
 
     public init(
@@ -593,6 +617,8 @@ public struct OutgoingDraft: Codable, Hashable, Sendable, Identifiable {
         bccRecipients: [MailParticipant] = [],
         subject: String = "",
         plainBody: String = "",
+        htmlBody: String? = nil,
+        quotedReply: DraftQuotedReply? = nil,
         updatedAt: Date = Date()
     ) {
         self.id = id
@@ -606,6 +632,8 @@ public struct OutgoingDraft: Codable, Hashable, Sendable, Identifiable {
         self.bccRecipients = bccRecipients
         self.subject = subject
         self.plainBody = plainBody
+        self.htmlBody = htmlBody
+        self.quotedReply = quotedReply
         self.updatedAt = updatedAt
     }
 }
