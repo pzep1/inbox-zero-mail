@@ -65,6 +65,8 @@ jobs:
       - name: Archive signed app
         shell: bash
         env:
+          INBOX_ZERO_GMAIL_CLIENT_ID: ${{ secrets.INBOX_ZERO_GMAIL_CLIENT_ID }}
+          INBOX_ZERO_GMAIL_CLIENT_SECRET: ${{ secrets.INBOX_ZERO_GMAIL_CLIENT_SECRET }}
           SPARKLE_APPCAST_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/appcast.xml
           SPARKLE_PUBLIC_ED_KEY: ${{ secrets.SPARKLE_PUBLIC_ED_KEY }}
         run: |
@@ -76,6 +78,8 @@ jobs:
             -configuration Release \
             -destination "platform=macOS" \
             -archivePath "$archive_path" \
+            INBOX_ZERO_GMAIL_CLIENT_ID="$INBOX_ZERO_GMAIL_CLIENT_ID" \
+            INBOX_ZERO_GMAIL_CLIENT_SECRET="$INBOX_ZERO_GMAIL_CLIENT_SECRET" \
             SPARKLE_APPCAST_URL="$SPARKLE_APPCAST_URL" \
             SPARKLE_PUBLIC_ED_KEY="$SPARKLE_PUBLIC_ED_KEY"
 
