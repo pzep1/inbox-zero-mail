@@ -1,0 +1,13 @@
+services:
+  emulate:
+    image: node:24-bookworm-slim
+    working_dir: /workspace
+    command:
+      - bash
+      - -lc
+      - npx --yes @inbox-zero/emulate@0.4.5 start --port 4402 --service google,microsoft --seed /workspace/tools/emulator/dev-seed.yaml
+    ports:
+      - "4402:4402"
+      - "4403:4403"
+    volumes:
+      - .:/workspace

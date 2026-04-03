@@ -1,0 +1,14 @@
+.DS_Store
+.context/
+/.build/
+/.swiftpm/
+DerivedData/
+.env
+.env.*
+*.xcconfig.local
+Config/LocalSecrets.xcconfig
+*.xcuserstate
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+Packages/**/.build/
+Packages/**/.swiftpm/

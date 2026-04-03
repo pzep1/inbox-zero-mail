@@ -1,0 +1,172 @@
+google:
+  users:
+    - email: alpha.inbox@example.com
+      name: Alpha Inbox
+    - email: beta.inbox@example.com
+      name: Beta Inbox
+  oauth_clients:
+    - client_id: inbox-zero-mail-dev
+      client_secret: inbox-zero-google-secret
+      redirect_uris:
+        - inboxzeromail://oauth/google
+        - http://localhost:4000/oauth/google
+        - http://localhost:4002/oauth/google
+        - http://localhost:4402/oauth/google
+        - http://127.0.0.1/oauth/google
+  labels:
+    - id: Label_ops
+      user_email: alpha.inbox@example.com
+      name: Ops/Review
+      color_background: "#DDEEFF"
+      color_text: "#111111"
+    - id: Label_vip
+      user_email: beta.inbox@example.com
+      name: VIP
+      color_background: "#FFF0C2"
+      color_text: "#4A3200"
+  messages:
+    - id: msg_alpha_release
+      user_email: alpha.inbox@example.com
+      from: ops@example.com
+      to: alpha.inbox@example.com
+      subject: Release checklist
+      body_text: Archive, star, and reply actions are wired up.
+      label_ids: [INBOX, UNREAD, STARRED, Label_ops]
+    - id: msg_alpha_customer
+      user_email: alpha.inbox@example.com
+      from: customer@example.com
+      to: alpha.inbox@example.com
+      subject: Customer follow-up
+      body_text: Please confirm the rollout window.
+      label_ids: [INBOX]
+    - id: msg_alpha_triage
+      user_email: alpha.inbox@example.com
+      from: support@example.com
+      to: alpha.inbox@example.com
+      subject: Escalation queue for Monday
+      body_text: There are six customer escalations waiting for triage in the ops queue.
+      label_ids: [INBOX, UNREAD, Label_ops]
+    - id: msg_alpha_design
+      user_email: alpha.inbox@example.com
+      from: design@example.com
+      to: alpha.inbox@example.com
+      subject: List view polish review
+      body_text: The new list view needs stronger keyboard focus states before sign-off.
+      label_ids: [INBOX]
+    - id: msg_alpha_invoice
+      user_email: alpha.inbox@example.com
+      from: billing@example.com
+      to: alpha.inbox@example.com
+      subject: April infrastructure invoice
+      body_text: The draft invoice is attached and ready for review.
+      label_ids: [INBOX]
+    - id: msg_alpha_incident
+      user_email: alpha.inbox@example.com
+      from: alerts@example.com
+      to: alpha.inbox@example.com
+      subject: Incident retro notes
+      body_text: Root cause and follow-up actions are ready for distribution.
+      label_ids: [INBOX, STARRED, Label_ops]
+    - id: msg_alpha_founder
+      user_email: alpha.inbox@example.com
+      from: founders@example.com
+      to: alpha.inbox@example.com
+      subject: Investor update draft
+      body_text: Can you tighten the product metrics section before tonight.
+      label_ids: [INBOX]
+    - id: msg_beta_ops
+      user_email: beta.inbox@example.com
+      from: founders@example.com
+      to: beta.inbox@example.com
+      subject: Multi-account review
+      body_text: The unified inbox should surface both Gmail accounts together.
+      label_ids: [INBOX, UNREAD, Label_vip]
+    - id: msg_beta_launch
+      user_email: beta.inbox@example.com
+      from: marketing@example.com
+      to: beta.inbox@example.com
+      subject: Launch checklist approval
+      body_text: Final copy, screenshots, and announcement timing are ready for approval.
+      label_ids: [INBOX, STARRED]
+    - id: msg_beta_hiring
+      user_email: beta.inbox@example.com
+      from: recruiting@example.com
+      to: beta.inbox@example.com
+      subject: Hiring debrief
+      body_text: Candidate feedback is in and we need a decision by end of day.
+      label_ids: [INBOX, UNREAD, Label_vip]
+    - id: msg_beta_budget
+      user_email: beta.inbox@example.com
+      from: finance@example.com
+      to: beta.inbox@example.com
+      subject: Budget sign-off needed
+      body_text: The revised cloud budget is ready for review and sign-off.
+      label_ids: [INBOX]
+    - id: msg_beta_customer
+      user_email: beta.inbox@example.com
+      from: vip.customer@example.com
+      to: beta.inbox@example.com
+      subject: VIP migration timeline
+      body_text: Please send over the final migration timeline and owner list.
+      label_ids: [INBOX, UNREAD, STARRED, Label_vip]
+    - id: msg_beta_digest
+      user_email: beta.inbox@example.com
+      from: digest@example.com
+      to: beta.inbox@example.com
+      subject: Weekly product digest
+      body_text: Here is the condensed summary of shipped work, blockers, and open questions.
+      label_ids: [INBOX]
+
+microsoft:
+  users:
+    - email: gamma.outlook@example.com
+      name: Gamma Outlook
+  oauth_clients:
+    - client_id: inbox-zero-mail-dev
+      client_secret: inbox-zero-microsoft-secret
+      redirect_uris:
+        - inboxzeromail://oauth/microsoft
+        - http://localhost:4001/oauth/microsoft
+        - http://localhost:4003/oauth/microsoft
+        - http://localhost:4403/oauth/microsoft
+        - http://127.0.0.1/oauth/microsoft
+  categories:
+    - display_name: Follow Up
+      color: preset4
+  messages:
+    - user_email: gamma.outlook@example.com
+      from:
+        address: alerts@example.com
+        name: Alerts
+      to_recipients:
+        - address: gamma.outlook@example.com
+      subject: Microsoft follow up
+      body_content: "<p>Outlook folder/category mapping is ready.</p>"
+      parent_folder_id: inbox
+    - user_email: gamma.outlook@example.com
+      from:
+        address: legal@example.com
+        name: Legal
+      to_recipients:
+        - address: gamma.outlook@example.com
+      subject: Contract redlines
+      body_content: "<p>The enterprise redlines are attached and need review before Friday.</p>"
+      parent_folder_id: inbox
+    - user_email: gamma.outlook@example.com
+      from:
+        address: support@example.com
+        name: Support
+      to_recipients:
+        - address: gamma.outlook@example.com
+      subject: Enterprise onboarding queue
+      body_content: "<p>Three enterprise customers are waiting on onboarding steps.</p>"
+      parent_folder_id: inbox
+    - user_email: gamma.outlook@example.com
+      from:
+        address: product@example.com
+        name: Product
+      to_recipients:
+        - address: gamma.outlook@example.com
+      subject: Outlook parity review
+      body_content: "<p>We need a final pass on Outlook parity before the next demo.</p>"
+      parent_folder_id: inbox

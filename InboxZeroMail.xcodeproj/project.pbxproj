@@ -1,0 +1,708 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A10000010000000000000001 /* MailCore in Frameworks */ = {isa = PBXBuildFile; productRef = A10000020000000000000001 /* MailCore */; };
+		A10000110000000000000001 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = A10000120000000000000001 /* DesignSystem */; };
+		A10000210000000000000001 /* MailData in Frameworks */ = {isa = PBXBuildFile; productRef = A10000220000000000000001 /* MailData */; };
+		A10000310000000000000001 /* MailFeatures in Frameworks */ = {isa = PBXBuildFile; productRef = A10000320000000000000001 /* MailFeatures */; };
+		A10000410000000000000001 /* ProviderGmail in Frameworks */ = {isa = PBXBuildFile; productRef = A10000420000000000000001 /* ProviderGmail */; };
+		A10000510000000000000001 /* ProviderOutlook in Frameworks */ = {isa = PBXBuildFile; productRef = A10000520000000000000001 /* ProviderOutlook */; };
+		A10000710000000000000001 /* AppUpdates in Frameworks */ = {isa = PBXBuildFile; productRef = A10000720000000000000001 /* AppUpdates */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		47CC6AC62F77A8770009E484 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 47CC6AB02F77A8760009E484 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 47CC6AB72F77A8760009E484;
+			remoteInfo = InboxZeroMail;
+		};
+		47CC6AD02F77A8770009E484 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 47CC6AB02F77A8760009E484 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 47CC6AB72F77A8760009E484;
+			remoteInfo = InboxZeroMail;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		47CC6AB82F77A8760009E484 /* InboxZeroMail.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = InboxZeroMail.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		47CC6AC52F77A8770009E484 /* InboxZeroMailTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = InboxZeroMailTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		47CC6ACF2F77A8770009E484 /* InboxZeroMailUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = InboxZeroMailUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000610000000000000001 /* Config/InboxZeroMail.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config/InboxZeroMail.xcconfig; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		47CC6ABA2F77A8760009E484 /* InboxZeroMail */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = InboxZeroMail;
+			sourceTree = "<group>";
+		};
+		47CC6AC82F77A8770009E484 /* InboxZeroMailTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = InboxZeroMailTests;
+			sourceTree = "<group>";
+		};
+		47CC6AD22F77A8770009E484 /* InboxZeroMailUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = InboxZeroMailUITests;
+			sourceTree = "<group>";
+		};
+		A10000030000000000000001 /* Packages */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Packages;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		47CC6AB52F77A8760009E484 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000710000000000000001 /* AppUpdates in Frameworks */,
+				A10000110000000000000001 /* DesignSystem in Frameworks */,
+				A10000010000000000000001 /* MailCore in Frameworks */,
+				A10000210000000000000001 /* MailData in Frameworks */,
+				A10000310000000000000001 /* MailFeatures in Frameworks */,
+				A10000410000000000000001 /* ProviderGmail in Frameworks */,
+				A10000510000000000000001 /* ProviderOutlook in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		47CC6AC22F77A8770009E484 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		47CC6ACC2F77A8770009E484 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		474D5EC02F7B3B1900985590 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				A10000610000000000000001 /* Config/InboxZeroMail.xcconfig */,
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
+		47CC6AAF2F77A8760009E484 = {
+			isa = PBXGroup;
+			children = (
+				47CC6ABA2F77A8760009E484 /* InboxZeroMail */,
+				47CC6AC82F77A8770009E484 /* InboxZeroMailTests */,
+				47CC6AD22F77A8770009E484 /* InboxZeroMailUITests */,
+				A10000030000000000000001 /* Packages */,
+				47CC6AB92F77A8760009E484 /* Products */,
+				474D5EC02F7B3B1900985590 /* Recovered References */,
+			);
+			sourceTree = "<group>";
+		};
+		47CC6AB92F77A8760009E484 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				47CC6AB82F77A8760009E484 /* InboxZeroMail.app */,
+				47CC6AC52F77A8770009E484 /* InboxZeroMailTests.xctest */,
+				47CC6ACF2F77A8770009E484 /* InboxZeroMailUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		47CC6AB72F77A8760009E484 /* InboxZeroMail */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 47CC6AD92F77A8770009E484 /* Build configuration list for PBXNativeTarget "InboxZeroMail" */;
+			buildPhases = (
+				47CC6AB42F77A8760009E484 /* Sources */,
+				47CC6AB52F77A8760009E484 /* Frameworks */,
+				47CC6AB62F77A8760009E484 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				47CC6ABA2F77A8760009E484 /* InboxZeroMail */,
+			);
+			name = InboxZeroMail;
+			packageProductDependencies = (
+				A10000720000000000000001 /* AppUpdates */,
+				A10000120000000000000001 /* DesignSystem */,
+				A10000020000000000000001 /* MailCore */,
+				A10000220000000000000001 /* MailData */,
+				A10000320000000000000001 /* MailFeatures */,
+				A10000420000000000000001 /* ProviderGmail */,
+				A10000520000000000000001 /* ProviderOutlook */,
+			);
+			productName = InboxZeroMail;
+			productReference = 47CC6AB82F77A8760009E484 /* InboxZeroMail.app */;
+			productType = "com.apple.product-type.application";
+		};
+		47CC6AC42F77A8770009E484 /* InboxZeroMailTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 47CC6ADC2F77A8770009E484 /* Build configuration list for PBXNativeTarget "InboxZeroMailTests" */;
+			buildPhases = (
+				47CC6AC12F77A8770009E484 /* Sources */,
+				47CC6AC22F77A8770009E484 /* Frameworks */,
+				47CC6AC32F77A8770009E484 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				47CC6AC72F77A8770009E484 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				47CC6AC82F77A8770009E484 /* InboxZeroMailTests */,
+			);
+			name = InboxZeroMailTests;
+			packageProductDependencies = (
+			);
+			productName = InboxZeroMailTests;
+			productReference = 47CC6AC52F77A8770009E484 /* InboxZeroMailTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		47CC6ACE2F77A8770009E484 /* InboxZeroMailUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 47CC6ADF2F77A8770009E484 /* Build configuration list for PBXNativeTarget "InboxZeroMailUITests" */;
+			buildPhases = (
+				47CC6ACB2F77A8770009E484 /* Sources */,
+				47CC6ACC2F77A8770009E484 /* Frameworks */,
+				47CC6ACD2F77A8770009E484 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				47CC6AD12F77A8770009E484 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				47CC6AD22F77A8770009E484 /* InboxZeroMailUITests */,
+			);
+			name = InboxZeroMailUITests;
+			packageProductDependencies = (
+			);
+			productName = InboxZeroMailUITests;
+			productReference = 47CC6ACF2F77A8770009E484 /* InboxZeroMailUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		47CC6AB02F77A8760009E484 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2630;
+				LastUpgradeCheck = 2630;
+				TargetAttributes = {
+					47CC6AB72F77A8760009E484 = {
+						CreatedOnToolsVersion = 26.3;
+					};
+					47CC6AC42F77A8770009E484 = {
+						CreatedOnToolsVersion = 26.3;
+						TestTargetID = 47CC6AB72F77A8760009E484;
+					};
+					47CC6ACE2F77A8770009E484 = {
+						CreatedOnToolsVersion = 26.3;
+						TestTargetID = 47CC6AB72F77A8760009E484;
+					};
+				};
+			};
+			buildConfigurationList = 47CC6AB32F77A8760009E484 /* Build configuration list for PBXProject "InboxZeroMail" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 47CC6AAF2F77A8760009E484;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				A10000730000000000000001 /* XCLocalSwiftPackageReference "Packages/AppUpdates" */,
+				A10000130000000000000001 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */,
+				A10000040000000000000001 /* XCLocalSwiftPackageReference "Packages/MailCore" */,
+				A10000230000000000000001 /* XCLocalSwiftPackageReference "Packages/MailData" */,
+				A10000330000000000000001 /* XCLocalSwiftPackageReference "Packages/MailFeatures" */,
+				A10000430000000000000001 /* XCLocalSwiftPackageReference "Packages/ProviderGmail" */,
+				A10000530000000000000001 /* XCLocalSwiftPackageReference "Packages/ProviderOutlook" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 47CC6AB92F77A8760009E484 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				47CC6AB72F77A8760009E484 /* InboxZeroMail */,
+				47CC6AC42F77A8770009E484 /* InboxZeroMailTests */,
+				47CC6ACE2F77A8770009E484 /* InboxZeroMailUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		47CC6AB62F77A8760009E484 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		47CC6AC32F77A8770009E484 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		47CC6ACD2F77A8770009E484 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		47CC6AB42F77A8760009E484 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		47CC6AC12F77A8770009E484 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		47CC6ACB2F77A8770009E484 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		47CC6AC72F77A8770009E484 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 47CC6AB72F77A8760009E484 /* InboxZeroMail */;
+			targetProxy = 47CC6AC62F77A8770009E484 /* PBXContainerItemProxy */;
+		};
+		47CC6AD12F77A8770009E484 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 47CC6AB72F77A8760009E484 /* InboxZeroMail */;
+			targetProxy = 47CC6AD02F77A8770009E484 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		47CC6AD72F77A8770009E484 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = Z46U4K6CNL;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		47CC6AD82F77A8770009E484 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = Z46U4K6CNL;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		47CC6ADA2F77A8770009E484 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A10000610000000000000001 /* Config/InboxZeroMail.xcconfig */;
+			buildSettings = {
+				APP_DISPLAY_NAME = "Inbox Zero";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ALLOW_ENTITLEMENTS_MODIFICATION = YES;
+				CODE_SIGN_ENTITLEMENTS = InboxZeroMail/InboxZeroMail.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Z46U4K6CNL;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Config/InboxZeroMail-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.getinboxzero.InboxZeroMail;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		47CC6ADB2F77A8770009E484 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A10000610000000000000001 /* Config/InboxZeroMail.xcconfig */;
+			buildSettings = {
+				APP_DISPLAY_NAME = "Inbox Zero";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ALLOW_ENTITLEMENTS_MODIFICATION = YES;
+				CODE_SIGN_ENTITLEMENTS = InboxZeroMail/InboxZeroMail.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Z46U4K6CNL;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Config/InboxZeroMail-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.getinboxzero.InboxZeroMail;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		47CC6ADD2F77A8770009E484 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Z46U4K6CNL;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.getinboxzero.InboxZeroMailTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/InboxZeroMail.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/InboxZeroMail";
+			};
+			name = Debug;
+		};
+		47CC6ADE2F77A8770009E484 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Z46U4K6CNL;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.getinboxzero.InboxZeroMailTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/InboxZeroMail.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/InboxZeroMail";
+			};
+			name = Release;
+		};
+		47CC6AE02F77A8770009E484 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Z46U4K6CNL;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.getinboxzero.InboxZeroMailUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = InboxZeroMail;
+			};
+			name = Debug;
+		};
+		47CC6AE12F77A8770009E484 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Z46U4K6CNL;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.getinboxzero.InboxZeroMailUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = InboxZeroMail;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		47CC6AB32F77A8760009E484 /* Build configuration list for PBXProject "InboxZeroMail" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				47CC6AD72F77A8770009E484 /* Debug */,
+				47CC6AD82F77A8770009E484 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		47CC6AD92F77A8770009E484 /* Build configuration list for PBXNativeTarget "InboxZeroMail" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				47CC6ADA2F77A8770009E484 /* Debug */,
+				47CC6ADB2F77A8770009E484 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		47CC6ADC2F77A8770009E484 /* Build configuration list for PBXNativeTarget "InboxZeroMailTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				47CC6ADD2F77A8770009E484 /* Debug */,
+				47CC6ADE2F77A8770009E484 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		47CC6ADF2F77A8770009E484 /* Build configuration list for PBXNativeTarget "InboxZeroMailUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				47CC6AE02F77A8770009E484 /* Debug */,
+				47CC6AE12F77A8770009E484 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		A10000040000000000000001 /* XCLocalSwiftPackageReference "Packages/MailCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/MailCore;
+		};
+		A10000130000000000000001 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/DesignSystem;
+		};
+		A10000230000000000000001 /* XCLocalSwiftPackageReference "Packages/MailData" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/MailData;
+		};
+		A10000330000000000000001 /* XCLocalSwiftPackageReference "Packages/MailFeatures" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/MailFeatures;
+		};
+		A10000430000000000000001 /* XCLocalSwiftPackageReference "Packages/ProviderGmail" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/ProviderGmail;
+		};
+		A10000530000000000000001 /* XCLocalSwiftPackageReference "Packages/ProviderOutlook" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/ProviderOutlook;
+		};
+		A10000730000000000000001 /* XCLocalSwiftPackageReference "Packages/AppUpdates" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/AppUpdates;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A10000020000000000000001 /* MailCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A10000040000000000000001 /* XCLocalSwiftPackageReference "Packages/MailCore" */;
+			productName = MailCore;
+		};
+		A10000120000000000000001 /* DesignSystem */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A10000130000000000000001 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */;
+			productName = DesignSystem;
+		};
+		A10000220000000000000001 /* MailData */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A10000230000000000000001 /* XCLocalSwiftPackageReference "Packages/MailData" */;
+			productName = MailData;
+		};
+		A10000320000000000000001 /* MailFeatures */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A10000330000000000000001 /* XCLocalSwiftPackageReference "Packages/MailFeatures" */;
+			productName = MailFeatures;
+		};
+		A10000420000000000000001 /* ProviderGmail */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A10000430000000000000001 /* XCLocalSwiftPackageReference "Packages/ProviderGmail" */;
+			productName = ProviderGmail;
+		};
+		A10000520000000000000001 /* ProviderOutlook */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A10000530000000000000001 /* XCLocalSwiftPackageReference "Packages/ProviderOutlook" */;
+			productName = ProviderOutlook;
+		};
+		A10000720000000000000001 /* AppUpdates */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A10000730000000000000001 /* XCLocalSwiftPackageReference "Packages/AppUpdates" */;
+			productName = AppUpdates;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 47CC6AB02F77A8760009E484 /* Project object */;
+}

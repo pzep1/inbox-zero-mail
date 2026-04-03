@@ -1,0 +1,5 @@
+#!/bin/zsh
+set -euo pipefail
+
+repo_root="${0:A:h:h:h}"
+exec swift run --package-path "${repo_root}/Packages/MailControlCLI" inboxctl "$@"

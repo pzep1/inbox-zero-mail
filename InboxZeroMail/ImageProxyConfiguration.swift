@@ -1,0 +1,139 @@
+import Foundation
+
+struct ImageProxyConfiguration: Equatable {
+    let baseURL: URL
+
+    var origin: String {
+        guard var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false) else {
+            return baseURL.absoluteString
+        }
+
+        components.path = ""
+        components.query = nil
+        components.fragment = nil
+
+        var origin = (components.url ?? baseURL).absoluteString
+        if origin.hasSuffix("/") {
+            origin.removeLast()
+        }
+        return origin
+    }
+
+    static func resolve(environment: [String: String] = ProcessInfo.processInfo.environment) -> ImageProxyConfiguration? {
+        let rawValue = trimmedEnvironmentValue(
+            for: "INBOX_ZERO_IMAGE_PROXY_BASE_URL",
+            environment: environment
+        ) ?? trimmedEnvironmentValue(
+            for: "NEXT_PUBLIC_IMAGE_PROXY_BASE_URL",
+            environment: environment
+        )
+
+        if let rawValue {
+            if disabledEnvironmentValues.contains(rawValue.lowercased()) {
+                return nil
+            }
+            return normalized(from: rawValue)
+        }
+
+        return normalized(from: "img.getinboxzero.com")
+    }
+
+    static func normalized(from rawValue: String) -> ImageProxyConfiguration? {
+        let trimmed = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.isEmpty == false else { return nil }
+
+        let candidate = trimmed.contains("://") ? trimmed : "https://\(trimmed)"
+        guard var components = URLComponents(string: candidate),
+              let scheme = components.scheme?.lowercased(),
+              ["http", "https"].contains(scheme),
+              let host = components.host,
+              host.isEmpty == false
+        else {
+            return nil
+        }
+
+        if components.path.isEmpty || components.path == "/" {
+            components.path = "/proxy"
+        }
+
+        guard let normalizedURL = components.url else { return nil }
+        return ImageProxyConfiguration(baseURL: normalizedURL)
+    }
+
+    func proxiedAssetURL(for assetURLString: String) -> String {
+        let trimmedValue = assetURLString.trimmingCharacters(in: .whitespacesAndNewlines)
+        let decodedAssetURL = decodeHTMLURLValue(trimmedValue)
+
+        guard let assetComponents = URLComponents(string: decodedAssetURL),
+              let scheme = assetComponents.scheme?.lowercased(),
+              ["http", "https"].contains(scheme)
+        else {
+            return assetURLString
+        }
+
+        guard isProxyEndpoint(assetComponents) == false else {
+            return assetURLString
+        }
+
+        guard var proxyComponents = URLComponents(url: baseURL, resolvingAgainstBaseURL: false) else {
+            return assetURLString
+        }
+
+        let encodedAssetURL = percentEncodedQueryValue(decodedAssetURL)
+        var queryComponents: [String] = []
+
+        if let existingQuery = proxyComponents.percentEncodedQuery,
+           existingQuery.isEmpty == false {
+            queryComponents.append(existingQuery)
+        }
+
+        queryComponents.append("u=\(encodedAssetURL)")
+        proxyComponents.percentEncodedQuery = queryComponents.joined(separator: "&")
+
+        return proxyComponents.url?.absoluteString ?? assetURLString
+    }
+
+    private func isProxyEndpoint(_ urlComponents: URLComponents) -> Bool {
+        guard let proxyComponents = URLComponents(url: baseURL, resolvingAgainstBaseURL: false) else {
+            return false
+        }
+
+        return urlComponents.scheme?.lowercased() == proxyComponents.scheme?.lowercased()
+            && urlComponents.host?.lowercased() == proxyComponents.host?.lowercased()
+            && urlComponents.port == proxyComponents.port
+            && urlComponents.path == proxyComponents.path
+    }
+
+    private static func trimmedEnvironmentValue(
+        for key: String,
+        environment: [String: String]
+    ) -> String? {
+        guard let value = environment[key]?.trimmingCharacters(in: .whitespacesAndNewlines),
+              value.isEmpty == false
+        else {
+            return nil
+        }
+        return value
+    }
+
+    private static let disabledEnvironmentValues: Set<String> = [
+        "0",
+        "false",
+        "off",
+        "disabled",
+        "none",
+    ]
+}
+
+private func decodeHTMLURLValue(_ value: String) -> String {
+    value
+        .replacingOccurrences(of: "&amp;", with: "&")
+        .replacingOccurrences(of: "&#38;", with: "&")
+        .replacingOccurrences(of: "&#x26;", with: "&")
+        .replacingOccurrences(of: "&#X26;", with: "&")
+}
+
+private func percentEncodedQueryValue(_ value: String) -> String {
+    let allowedCharacters = CharacterSet(charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~")
+    return value.addingPercentEncoding(withAllowedCharacters: allowedCharacters) ?? value
+}

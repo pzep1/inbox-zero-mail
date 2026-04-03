@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - mac-mail-client-plan
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  package-tests:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "24"
+
+      - name: Run Swift Package Tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          for package in Packages/*; do
+            echo "==> swift test in ${package}"
+            (cd "${package}" && swift test)
+          done
+
+  provider-contract-tests:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "24"
+
+      - name: Start mail emulator
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes @inbox-zero/emulate@0.4.5 start --port 4402 --service google,microsoft --seed tools/emulator/dev-seed.yaml > /tmp/emulate.log 2>&1 &
+          for attempt in {1..30}; do
+            if curl -sf "http://localhost:4402/o/oauth2/v2/auth?client_id=inbox-zero-mail-dev&redirect_uri=http://localhost:4402/oauth/google&response_type=code&scope=openid%20email" > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/emulate.log
+          exit 1
+
+      - name: Run Gmail contract tests
+        shell: bash
+        env:
+          INBOX_ZERO_RUN_EMULATOR_TESTS: "1"
+          INBOX_ZERO_GOOGLE_BASE_URL: http://localhost:4402
+        run: |
+          set -euo pipefail
+          cd Packages/ProviderGmail
+          swift test
+
+      - name: Run Outlook contract tests
+        shell: bash
+        env:
+          INBOX_ZERO_RUN_EMULATOR_TESTS: "1"
+          INBOX_ZERO_MICROSOFT_BASE_URL: http://localhost:4403
+        run: |
+          set -euo pipefail
+          cd Packages/ProviderOutlook
+          swift test
+
+  app-tests:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "24"
+
+      - name: Run unit tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild test \
+            -project InboxZeroMail.xcodeproj \
+            -scheme InboxZeroMail \
+            -destination "platform=macOS" \
+            -only-testing:InboxZeroMailTests \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM=""
+
+      - name: Run UI tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild test \
+            -project InboxZeroMail.xcodeproj \
+            -scheme InboxZeroMail \
+            -destination "platform=macOS" \
+            -only-testing:InboxZeroMailUITests \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM=""
