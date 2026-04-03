@@ -831,6 +831,29 @@ func batchArchiveUndoReplaysReverseMutationForEverySelectedThread() async throws
 
 @Test
 @MainActor
+func batchArchiveRemovesSelectedThreadsFromVisibleListImmediately() async throws {
+    let account = makeAccount()
+    let first = makeThread(accountID: account.id, providerThreadID: "thread-1", hasUnread: false)
+    let second = makeThread(accountID: account.id, providerThreadID: "thread-2", subject: "Second", hasUnread: false)
+    let third = makeThread(accountID: account.id, providerThreadID: "thread-3", subject: "Third", hasUnread: false)
+    let workspace = StubWorkspace(accounts: [account], threads: [first, second, third], detail: nil)
+    let model = makeWindowModel(workspace: workspace)
+
+    await model.store.reloadSharedData(reason: .initial)
+    await model.reloadThreads()
+    model.hoveredThreadID = first.id
+    model.toggleMultiSelect(threadID: first.id)
+    model.toggleMultiSelect(threadID: second.id)
+
+    model.batchArchive()
+
+    #expect(model.threads.map(\.id) == [third.id])
+    #expect(model.multiSelectedIDs.isEmpty)
+    #expect(model.selectedThreadID == nil)
+}
+
+@Test
+@MainActor
 func archivingSelectedThreadWithoutHoverAdvancesToNextVisibleThread() async throws {
     let account = makeAccount()
     let first = makeThread(accountID: account.id, providerThreadID: "thread-1", hasUnread: false)

@@ -586,7 +586,11 @@ public final class WindowModel {
     public func batchArchive() {
         let ids = actionableThreadIDs
         guard !ids.isEmpty else { return }
-        for id in ids { perform(.archive(threadID: id)) }
+        performBatchWithOptimisticThreadRemoval(
+            ids,
+            shouldRemoveFromCurrentList: archiveRemovesThreadFromCurrentList,
+            mutation: { .archive(threadID: $0) }
+        )
         showUndo(label: "Archived \(ids.count) conversations", reverseMutations: ids.map { .unarchive(threadID: $0) })
         clearMultiSelection()
         closeThread()
@@ -1285,6 +1289,32 @@ private extension WindowModel {
         return snapshot
     }
 
+    func optimisticallyRemoveThreadsFromCurrentList(_ threadIDs: [MailThreadID]) -> ThreadListStateSnapshot {
+        let snapshot = captureThreadListState()
+        let removedIDs = Set(threadIDs)
+        let originalThreads = threads
+
+        threads = originalThreads.filter { removedIDs.contains($0.id) == false }
+
+        let nextThread: MailThread? = {
+            guard let firstRemovedIndex = originalThreads.firstIndex(where: { removedIDs.contains($0.id) }) else {
+                return threads.first
+            }
+            return firstRemovedIndex < threads.count ? threads[firstRemovedIndex] : threads.last
+        }()
+
+        if let hoveredThreadID, removedIDs.contains(hoveredThreadID) {
+            self.hoveredThreadID = nextThread?.id
+        }
+
+        multiSelectedIDs.subtract(removedIDs)
+        if let preferredID = nextThread?.id ?? threadIDs.first {
+            syncMultiSelectionAnchor(preferredID: preferredID)
+        }
+
+        return snapshot
+    }
+
     func performWithOptimisticThreadRemoval(
         _ mutation: MailMutation,
         threadID: MailThreadID,
@@ -1300,6 +1330,25 @@ private extension WindowModel {
             }
         }
         perform(mutation, reportErrors: reportErrors, rollbackOnError: rollbackOnError)
+    }
+
+    func performBatchWithOptimisticThreadRemoval(
+        _ threadIDs: [MailThreadID],
+        shouldRemoveFromCurrentList: Bool,
+        mutation: (MailThreadID) -> MailMutation,
+        reportErrors: Bool = true
+    ) {
+        var rollbackOnError: (() -> Void)?
+        if shouldRemoveFromCurrentList {
+            let snapshot = optimisticallyRemoveThreadsFromCurrentList(threadIDs)
+            rollbackOnError = { [weak self] in
+                self?.restoreThreadListState(snapshot)
+            }
+        }
+
+        for threadID in threadIDs {
+            perform(mutation(threadID), reportErrors: reportErrors, rollbackOnError: rollbackOnError)
+        }
     }
 
     func showUndo(label: String, reverseMutations: [MailMutation]) {

@@ -23,5 +23,9 @@ let package = Package(
                 .product(name: "Sparkle", package: "Sparkle"),
             ]
         ),
+        .testTarget(
+            name: "AppUpdatesTests",
+            dependencies: ["AppUpdates"]
+        ),
     ]
 )
