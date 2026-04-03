@@ -102,12 +102,7 @@ jobs:
           unstapled_zip="$RUNNER_TEMP/${APP_NAME}-${version}-unstapled.zip"
           final_zip="$RUNNER_TEMP/${APP_NAME}-${version}.zip"
           notary_key_path="$RUNNER_TEMP/notary/AuthKey_${APPLE_API_KEY_ID}.p8"
-          signing_identity="$(security find-identity -v -p codesigning | sed -n 's/.*\"\\(Developer ID Application:.*\\)\"/\\1/p' | head -n1)"
-
-          if [[ -z "$signing_identity" ]]; then
-            echo "Developer ID identity not found in keychain."
-            exit 1
-          fi
+          signing_identity="Developer ID Application"
 
           resign() {
             local path="$1"
