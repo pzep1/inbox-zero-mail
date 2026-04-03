@@ -78,6 +78,8 @@ jobs:
             -configuration Release \
             -destination "platform=macOS" \
             -archivePath "$archive_path" \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="Developer ID Application" \
             INBOX_ZERO_GMAIL_CLIENT_ID="$INBOX_ZERO_GMAIL_CLIENT_ID" \
             INBOX_ZERO_GMAIL_CLIENT_SECRET="$INBOX_ZERO_GMAIL_CLIENT_SECRET" \
             SPARKLE_APPCAST_URL="$SPARKLE_APPCAST_URL" \
