@@ -409,18 +409,30 @@ public final class WindowModel {
 
     public func toggleReadSelection() {
         guard let thread = hoveredOrSelectedThread else { return }
-        let mutation: MailMutation = thread.hasUnread ? .markRead(threadID: thread.id) : .markUnread(threadID: thread.id)
-        let reverse: MailMutation = thread.hasUnread ? .markUnread(threadID: thread.id) : .markRead(threadID: thread.id)
-        showUndo(label: thread.hasUnread ? "Marked Read" : "Marked Unread", reverseMutations: [reverse])
-        perform(mutation)
+        let willMarkRead = thread.hasUnread
+        let mutation: MailMutation = willMarkRead ? .markRead(threadID: thread.id) : .markUnread(threadID: thread.id)
+        let reverse: MailMutation = willMarkRead ? .markUnread(threadID: thread.id) : .markRead(threadID: thread.id)
+        showUndo(label: willMarkRead ? "Marked Read" : "Marked Unread", reverseMutations: [reverse])
+        performWithOptimisticUpdate(
+            mutation,
+            threadID: thread.id,
+            update: { $0.hasUnread = !willMarkRead },
+            shouldRemoveFromCurrentList: willMarkRead && self.markReadRemovesThreadFromCurrentList
+        )
     }
 
     public func toggleStarSelection() {
         guard let thread = hoveredOrSelectedThread else { return }
-        let mutation: MailMutation = thread.isStarred ? .unstar(threadID: thread.id) : .star(threadID: thread.id)
-        let reverse: MailMutation = thread.isStarred ? .star(threadID: thread.id) : .unstar(threadID: thread.id)
-        showUndo(label: thread.isStarred ? "Unstarred" : "Starred", reverseMutations: [reverse])
-        perform(mutation)
+        let willStar = !thread.isStarred
+        let mutation: MailMutation = willStar ? .star(threadID: thread.id) : .unstar(threadID: thread.id)
+        let reverse: MailMutation = willStar ? .unstar(threadID: thread.id) : .star(threadID: thread.id)
+        showUndo(label: willStar ? "Starred" : "Unstarred", reverseMutations: [reverse])
+        performWithOptimisticUpdate(
+            mutation,
+            threadID: thread.id,
+            update: { $0.isStarred = willStar },
+            shouldRemoveFromCurrentList: !willStar && self.unstarRemovesThreadFromCurrentList
+        )
     }
 
     // MARK: - Snooze
@@ -443,17 +455,15 @@ public final class WindowModel {
     public func snoozeSelection(until date: Date) {
         guard let targetID = hoveredThreadID ?? selectedThreadID else { return }
         hoveredThreadID = targetID
-        let nextThread = threadAfter(threadID: targetID)
         let mutation = MailMutation.snooze(threadID: targetID, until: date)
         let reverse = MailMutation.unsnooze(threadID: targetID)
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .abbreviated
         let label = "Snoozed until \(formatter.localizedString(for: date, relativeTo: Date()))"
         showUndo(label: label, reverseMutations: [reverse])
-        performWithOptimisticThreadRemoval(
+        performWithOptimisticUpdate(
             mutation,
             threadID: targetID,
-            nextThread: nextThread,
             shouldRemoveFromCurrentList: snoozeRemovesThreadFromCurrentList
         )
         isSnoozePickerPresented = false
@@ -463,14 +473,12 @@ public final class WindowModel {
         guard let thread = hoveredOrSelectedThread else { return }
         let targetID = thread.id
         hoveredThreadID = targetID
-        let nextThread = threadAfter(threadID: targetID)
         let mutation = MailMutation.unsnooze(threadID: targetID)
         let reverseMutations = thread.snoozedUntil.map { [MailMutation.snooze(threadID: targetID, until: $0)] } ?? []
         showUndo(label: "Removed snooze", reverseMutations: reverseMutations)
-        performWithOptimisticThreadRemoval(
+        performWithOptimisticUpdate(
             mutation,
             threadID: targetID,
-            nextThread: nextThread,
             shouldRemoveFromCurrentList: unsnoozeRemovesThreadFromCurrentList
         )
         isSnoozePickerPresented = false
@@ -586,7 +594,7 @@ public final class WindowModel {
     public func batchArchive() {
         let ids = actionableThreadIDs
         guard !ids.isEmpty else { return }
-        performBatchWithOptimisticThreadRemoval(
+        performBatchWithOptimisticUpdate(
             ids,
             shouldRemoveFromCurrentList: archiveRemovesThreadFromCurrentList,
             mutation: { .archive(threadID: $0) }
@@ -608,14 +616,23 @@ public final class WindowModel {
     public func batchMarkRead() {
         let ids = actionableThreadIDs
         guard !ids.isEmpty else { return }
-        for id in ids { perform(.markRead(threadID: id)) }
+        performBatchWithOptimisticUpdate(
+            ids,
+            update: { $0.hasUnread = false },
+            shouldRemoveFromCurrentList: markReadRemovesThreadFromCurrentList,
+            mutation: { .markRead(threadID: $0) }
+        )
         clearMultiSelection()
     }
 
     public func batchStar() {
         let ids = actionableThreadIDs
         guard !ids.isEmpty else { return }
-        for id in ids { perform(.star(threadID: id)) }
+        performBatchWithOptimisticUpdate(
+            ids,
+            update: { $0.isStarred = true },
+            mutation: { .star(threadID: $0) }
+        )
         clearMultiSelection()
     }
 
@@ -1040,14 +1057,12 @@ public final class WindowModel {
 
 private extension WindowModel {
     func archive(_ thread: MailThread) {
-        let nextThread = threadAfter(threadID: thread.id)
         let mutation = MailMutation.archive(threadID: thread.id)
         let reverse = MailMutation.unarchive(threadID: thread.id)
         showUndo(label: "Archived", reverseMutations: [reverse])
-        performWithOptimisticThreadRemoval(
+        performWithOptimisticUpdate(
             mutation,
             threadID: thread.id,
-            nextThread: nextThread,
             shouldRemoveFromCurrentList: archiveRemovesThreadFromCurrentList
         )
     }
@@ -1239,6 +1254,14 @@ private extension WindowModel {
         selectedTab == .snoozed
     }
 
+    var unstarRemovesThreadFromCurrentList: Bool {
+        selectedTab == .starred
+    }
+
+    var markReadRemovesThreadFromCurrentList: Bool {
+        selectedTab == .unread
+    }
+
     func advanceAfterRemovingThread(_ threadID: MailThreadID, nextThread: MailThread?) {
         if let nextThread {
             hoveredThreadID = nextThread.id
@@ -1281,74 +1304,72 @@ private extension WindowModel {
         multiSelectionAnchorID = snapshot.multiSelectionAnchorID
     }
 
-    func optimisticallyRemoveThreadFromCurrentList(_ threadID: MailThreadID, nextThread: MailThread?) -> ThreadListStateSnapshot {
-        let snapshot = captureThreadListState()
-        threads.removeAll { $0.id == threadID }
-        if multiSelectedIDs.contains(threadID) {
-            multiSelectedIDs.remove(threadID)
-            syncMultiSelectionAnchor(preferredID: nextThread?.id ?? threadID)
-        }
-        advanceAfterRemovingThread(threadID, nextThread: nextThread)
-        return snapshot
-    }
-
-    func optimisticallyRemoveThreadsFromCurrentList(_ threadIDs: [MailThreadID]) -> ThreadListStateSnapshot {
-        let snapshot = captureThreadListState()
-        let removedIDs = Set(threadIDs)
-        let originalThreads = threads
-
-        threads = originalThreads.filter { removedIDs.contains($0.id) == false }
-
-        let nextThread: MailThread? = {
-            guard let firstRemovedIndex = originalThreads.firstIndex(where: { removedIDs.contains($0.id) }) else {
-                return threads.first
-            }
-            return firstRemovedIndex < threads.count ? threads[firstRemovedIndex] : threads.last
-        }()
-
-        if let hoveredThreadID, removedIDs.contains(hoveredThreadID) {
-            self.hoveredThreadID = nextThread?.id
-        }
-
-        multiSelectedIDs.subtract(removedIDs)
-        if let preferredID = nextThread?.id ?? threadIDs.first {
-            syncMultiSelectionAnchor(preferredID: preferredID)
-        }
-
-        return snapshot
-    }
-
-    func performWithOptimisticThreadRemoval(
+    func performWithOptimisticUpdate(
         _ mutation: MailMutation,
         threadID: MailThreadID,
-        nextThread: MailThread?,
-        shouldRemoveFromCurrentList: Bool,
+        update: ((inout MailThread) -> Void)? = nil,
+        shouldRemoveFromCurrentList: Bool = false,
         reportErrors: Bool = true
     ) {
-        var rollbackOnError: (() -> Void)?
-        if shouldRemoveFromCurrentList {
-            let snapshot = optimisticallyRemoveThreadFromCurrentList(threadID, nextThread: nextThread)
-            rollbackOnError = { [weak self] in
-                self?.restoreThreadListState(snapshot)
-            }
+        let snapshot = captureThreadListState()
+
+        if let update, let index = threads.firstIndex(where: { $0.id == threadID }) {
+            update(&threads[index])
         }
-        perform(mutation, reportErrors: reportErrors, rollbackOnError: rollbackOnError)
+
+        if shouldRemoveFromCurrentList {
+            let nextThread = threadAfter(threadID: threadID)
+            threads.removeAll { $0.id == threadID }
+            if multiSelectedIDs.contains(threadID) {
+                multiSelectedIDs.remove(threadID)
+                syncMultiSelectionAnchor(preferredID: nextThread?.id ?? threadID)
+            }
+            advanceAfterRemovingThread(threadID, nextThread: nextThread)
+        }
+
+        perform(mutation, reportErrors: reportErrors) { [weak self] in
+            self?.restoreThreadListState(snapshot)
+        }
     }
 
-    func performBatchWithOptimisticThreadRemoval(
+    func performBatchWithOptimisticUpdate(
         _ threadIDs: [MailThreadID],
-        shouldRemoveFromCurrentList: Bool,
+        update: ((inout MailThread) -> Void)? = nil,
+        shouldRemoveFromCurrentList: Bool = false,
         mutation: (MailThreadID) -> MailMutation,
         reportErrors: Bool = true
     ) {
-        var rollbackOnError: (() -> Void)?
-        if shouldRemoveFromCurrentList {
-            let snapshot = optimisticallyRemoveThreadsFromCurrentList(threadIDs)
-            rollbackOnError = { [weak self] in
-                self?.restoreThreadListState(snapshot)
+        let snapshot = captureThreadListState()
+
+        if let update {
+            let idSet = Set(threadIDs)
+            for i in threads.indices where idSet.contains(threads[i].id) {
+                update(&threads[i])
             }
         }
 
+        if shouldRemoveFromCurrentList {
+            let removedIDs = Set(threadIDs)
+            let originalThreads = threads
+            threads = originalThreads.filter { !removedIDs.contains($0.id) }
+            let nextThread: MailThread? = {
+                guard let firstRemovedIndex = originalThreads.firstIndex(where: { removedIDs.contains($0.id) }) else {
+                    return threads.first
+                }
+                return firstRemovedIndex < threads.count ? threads[firstRemovedIndex] : threads.last
+            }()
+            if let hoveredThreadID, removedIDs.contains(hoveredThreadID) {
+                self.hoveredThreadID = nextThread?.id
+            }
+            multiSelectedIDs.subtract(removedIDs)
+            if let preferredID = nextThread?.id ?? threadIDs.first {
+                syncMultiSelectionAnchor(preferredID: preferredID)
+            }
+        }
+
+        let rollbackOnError: () -> Void = { [weak self] in
+            self?.restoreThreadListState(snapshot)
+        }
         for threadID in threadIDs {
             perform(mutation(threadID), reportErrors: reportErrors, rollbackOnError: rollbackOnError)
         }
