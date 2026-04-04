@@ -1730,9 +1730,15 @@ private struct ThreadListPane: View {
     @Bindable var model: WindowModel
     @AppStorage(AppPreferences.accountAvatarColorsVersionKey) private var avatarSettingsVersion = 0
     @AppStorage(AppPreferences.splitInboxTabsVersionKey) private var splitInboxTabsVersion = 0
+    @AppStorage(AppPreferences.threadRowDensityKey)
+    private var threadRowDensityRawValue = AppPreferences.defaultThreadRowDensity.rawValue
 
     private var visibleSplitInboxItems: [SplitInboxItem] {
         AppPreferences.configuredSplitInboxItems()
+    }
+
+    private var threadRowDensity: ThreadRowDensity {
+        ThreadRowDensity(rawValue: threadRowDensityRawValue) ?? AppPreferences.defaultThreadRowDensity
     }
 
     var body: some View {
@@ -1785,6 +1791,7 @@ private struct ThreadListPane: View {
                                         allAccounts: model.accounts,
                                         showAvatar: showAvatar
                                     ),
+                                    density: threadRowDensity,
                                     onToggleStar: model.isMultiSelectActive ? nil : {
                                         model.hoveredThreadID = thread.id
                                         model.toggleStarSelection()

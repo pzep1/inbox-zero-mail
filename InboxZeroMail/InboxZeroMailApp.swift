@@ -232,6 +232,8 @@ private struct AppSettingsView: View {
 
     @AppStorage(AppPreferences.loadRemoteImagesKey)
     private var loadRemoteImagesAutomatically = AppPreferences.loadRemoteImagesByDefault
+    @AppStorage(AppPreferences.threadRowDensityKey)
+    private var threadRowDensityRawValue = AppPreferences.defaultThreadRowDensity.rawValue
     @AppStorage(AppPreferences.accountAvatarColorsVersionKey)
     private var avatarSettingsVersion = 0
     @AppStorage(AppPreferences.splitInboxTabsVersionKey)
@@ -330,6 +332,19 @@ private struct AppSettingsView: View {
                 Text("Privacy")
             } footer: {
                 Text("Blocks external images and other remote assets in HTML email by default.")
+            }
+
+            Section {
+                Picker("Message List Density", selection: $threadRowDensityRawValue) {
+                    ForEach(ThreadRowDensity.allCases) { density in
+                        Text(density.title).tag(density.rawValue)
+                    }
+                }
+                .pickerStyle(.segmented)
+            } header: {
+                Text("Display")
+            } footer: {
+                Text("Comfortable is the default. Compact keeps the previous tighter thread list.")
             }
 
             Section {
