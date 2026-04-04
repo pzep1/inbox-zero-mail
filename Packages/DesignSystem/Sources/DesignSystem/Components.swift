@@ -59,6 +59,22 @@ public struct AccountAvatar: Sendable, Equatable {
     }
 }
 
+public enum ThreadRowDensity: String, CaseIterable, Identifiable, Sendable {
+    case compact
+    case comfortable
+
+    public var id: String { rawValue }
+
+    public var title: String {
+        switch self {
+        case .compact:
+            "Compact"
+        case .comfortable:
+            "Comfortable"
+        }
+    }
+}
+
 public struct ThreadRowView: View, Equatable {
     private static let selectionAccessoryWidth: CGFloat = 22
 
@@ -69,6 +85,7 @@ public struct ThreadRowView: View, Equatable {
     private let isMultiSelectActive: Bool
     private let isMultiSelected: Bool
     private let accountAvatar: AccountAvatar?
+    private let density: ThreadRowDensity
     private let onToggleStar: (() -> Void)?
 
     public nonisolated static func == (lhs: ThreadRowView, rhs: ThreadRowView) -> Bool {
@@ -78,7 +95,8 @@ public struct ThreadRowView: View, Equatable {
         lhs.isMultiSelectActive == rhs.isMultiSelectActive &&
         lhs.isMultiSelected == rhs.isMultiSelected &&
         lhs.accountText == rhs.accountText &&
-        lhs.accountAvatar == rhs.accountAvatar
+        lhs.accountAvatar == rhs.accountAvatar &&
+        lhs.density == rhs.density
     }
 
     public init(
@@ -89,6 +107,7 @@ public struct ThreadRowView: View, Equatable {
         isMultiSelectActive: Bool = false,
         isMultiSelected: Bool = false,
         accountAvatar: AccountAvatar? = nil,
+        density: ThreadRowDensity = .comfortable,
         onToggleStar: (() -> Void)? = nil
     ) {
         self.thread = thread
@@ -98,44 +117,46 @@ public struct ThreadRowView: View, Equatable {
         self.isMultiSelectActive = isMultiSelectActive
         self.isMultiSelected = isMultiSelected
         self.accountAvatar = accountAvatar
+        self.density = density
         self.onToggleStar = onToggleStar
     }
 
     public var body: some View {
+        let metrics = Metrics(density: density)
         HStack(spacing: 0) {
             // Unread indicator
             Circle()
                 .fill(thread.hasUnread ? MailDesignTokens.unread : Color.clear)
                 .frame(width: 6, height: 6)
-                .padding(.trailing, 8)
+                .padding(.trailing, metrics.unreadIndicatorTrailingPadding)
 
             // Star
             Group {
                 if let onToggleStar {
                     Button(action: onToggleStar) {
                         Image(systemName: thread.isStarred ? "star.fill" : "star")
-                            .font(.system(size: 11))
+                            .font(.system(size: metrics.starFontSize))
                             .foregroundStyle(thread.isStarred ? Color.yellow : MailDesignTokens.textTertiary)
-                            .frame(width: 16, height: 16)
+                            .frame(width: metrics.starFrame, height: metrics.starFrame)
                     }
                     .buttonStyle(.plain)
                     .help(thread.isStarred ? "Unstar" : "Star")
                     .accessibilityIdentifier("thread-row-star-\(thread.id.rawValue)")
                 } else {
                     Image(systemName: thread.isStarred ? "star.fill" : "star")
-                        .font(.system(size: 11))
+                        .font(.system(size: metrics.starFontSize))
                         .foregroundStyle(thread.isStarred ? Color.yellow : MailDesignTokens.textTertiary)
-                        .frame(width: 16, height: 16)
+                        .frame(width: metrics.starFrame, height: metrics.starFrame)
                 }
             }
-            .padding(.trailing, 10)
+            .padding(.trailing, metrics.starTrailingPadding)
 
             // Sender / participant
             Text(thread.participantSummary)
-                .font(.system(size: 13, weight: thread.hasUnread ? .semibold : .regular))
+                .font(.system(size: metrics.participantFontSize, weight: thread.hasUnread ? .semibold : .regular))
                 .foregroundStyle(MailDesignTokens.textPrimary)
                 .lineLimit(1)
-                .frame(width: 160, alignment: .leading)
+                .frame(width: metrics.participantWidth, alignment: .leading)
 
             // Labels (user-visible only)
             let visibleLabels = thread.mailboxRefs.filter { ref in
@@ -148,86 +169,171 @@ public struct ThreadRowView: View, Equatable {
                     }
                     if visibleLabels.count > 3 {
                         Text("+\(visibleLabels.count - 3)")
-                            .font(.system(size: 9, weight: .medium))
+                            .font(.system(size: metrics.labelOverflowFontSize, weight: .medium))
                             .foregroundStyle(MailDesignTokens.textTertiary)
                     }
                 }
-                .padding(.leading, 8)
-                .padding(.trailing, 8)
+                .padding(.leading, metrics.labelsHorizontalPadding)
+                .padding(.trailing, metrics.labelsHorizontalPadding)
             }
 
             // Subject + snippet
-            HStack(spacing: 6) {
+            HStack(spacing: metrics.subjectSnippetSpacing) {
                 Text(thread.subject)
-                    .font(.system(size: 13, weight: thread.hasUnread ? .medium : .regular))
+                    .font(.system(size: metrics.subjectFontSize, weight: thread.hasUnread ? .medium : .regular))
                     .foregroundStyle(MailDesignTokens.textPrimary)
                     .lineLimit(1)
 
                 Text("—")
-                    .font(.system(size: 12))
+                    .font(.system(size: metrics.separatorFontSize))
                     .foregroundStyle(MailDesignTokens.textTertiary)
 
                 Text(thread.snippet)
-                    .font(.system(size: 12))
+                    .font(.system(size: metrics.snippetFontSize))
                     .foregroundStyle(MailDesignTokens.textSecondary)
                     .lineLimit(1)
             }
 
-            Spacer(minLength: 8)
+            Spacer(minLength: metrics.trailingSpacerMinimum)
 
             // Snooze indicator
             if thread.isSnoozed {
                 Image(systemName: "clock")
-                    .font(.system(size: 10))
+                    .font(.system(size: metrics.statusIconFontSize))
                     .foregroundStyle(.orange)
-                    .padding(.trailing, 4)
+                    .padding(.trailing, metrics.statusIconTrailingPadding)
             }
 
             // Attachment indicator
             if thread.attachmentCount > 0 {
-                HStack(spacing: 2) {
+                HStack(spacing: metrics.attachmentSpacing) {
                     Image(systemName: "paperclip")
-                        .font(.system(size: 10))
+                        .font(.system(size: metrics.statusIconFontSize))
                     if thread.attachmentCount > 1 {
                         Text("\(thread.attachmentCount)")
-                            .font(.system(size: 10).monospacedDigit())
+                            .font(.system(size: metrics.statusIconFontSize).monospacedDigit())
                     }
                 }
                 .foregroundStyle(MailDesignTokens.textTertiary)
-                .padding(.trailing, 6)
+                .padding(.trailing, metrics.attachmentTrailingPadding)
             }
 
             // Time
             Text(relativeTime(thread.lastActivityAt))
-                .font(.system(size: 11).monospacedDigit())
+                .font(.system(size: metrics.timeFontSize).monospacedDigit())
                 .foregroundStyle(thread.hasUnread ? MailDesignTokens.textPrimary : MailDesignTokens.textSecondary)
 
             // Account avatar (All view only)
             if let avatar = accountAvatar {
                 Text(avatar.initial)
-                    .font(.system(size: 9, weight: .bold))
+                    .font(.system(size: metrics.avatarFontSize, weight: .bold))
                     .foregroundStyle(.white)
-                    .frame(width: 18, height: 18)
+                    .frame(width: metrics.avatarSize, height: metrics.avatarSize)
                     .background(avatar.color)
                     .clipShape(Circle())
-                    .padding(.leading, 8)
+                    .padding(.leading, metrics.avatarLeadingPadding)
             }
 
             ZStack(alignment: .trailing) {
                 if isMultiSelectActive {
                     Image(systemName: isMultiSelected ? "checkmark.circle.fill" : "circle")
-                        .font(.system(size: 14))
+                        .font(.system(size: metrics.selectionAccessoryFontSize))
                         .foregroundStyle(isMultiSelected ? MailDesignTokens.accent : MailDesignTokens.textTertiary)
                 }
             }
             .frame(width: Self.selectionAccessoryWidth)
-            .padding(.leading, 8)
+            .padding(.leading, metrics.selectionAccessoryLeadingPadding)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
+        .padding(.horizontal, metrics.rowHorizontalPadding)
+        .padding(.vertical, metrics.rowVerticalPadding)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(isSelected ? MailDesignTokens.selected : isHovered ? MailDesignTokens.selected.opacity(0.4) : Color.clear)
         .contentShape(Rectangle())
+    }
+
+    private struct Metrics {
+        let unreadIndicatorTrailingPadding: CGFloat
+        let starFontSize: CGFloat
+        let starFrame: CGFloat
+        let starTrailingPadding: CGFloat
+        let participantFontSize: CGFloat
+        let participantWidth: CGFloat
+        let labelsHorizontalPadding: CGFloat
+        let labelOverflowFontSize: CGFloat
+        let subjectSnippetSpacing: CGFloat
+        let subjectFontSize: CGFloat
+        let separatorFontSize: CGFloat
+        let snippetFontSize: CGFloat
+        let trailingSpacerMinimum: CGFloat
+        let statusIconFontSize: CGFloat
+        let statusIconTrailingPadding: CGFloat
+        let attachmentSpacing: CGFloat
+        let attachmentTrailingPadding: CGFloat
+        let timeFontSize: CGFloat
+        let avatarFontSize: CGFloat
+        let avatarSize: CGFloat
+        let avatarLeadingPadding: CGFloat
+        let selectionAccessoryFontSize: CGFloat
+        let selectionAccessoryLeadingPadding: CGFloat
+        let rowHorizontalPadding: CGFloat
+        let rowVerticalPadding: CGFloat
+
+        init(density: ThreadRowDensity) {
+            switch density {
+            case .compact:
+                unreadIndicatorTrailingPadding = 8
+                starFontSize = 11
+                starFrame = 16
+                starTrailingPadding = 10
+                participantFontSize = 13
+                participantWidth = 160
+                labelsHorizontalPadding = 8
+                labelOverflowFontSize = 9
+                subjectSnippetSpacing = 6
+                subjectFontSize = 13
+                separatorFontSize = 12
+                snippetFontSize = 12
+                trailingSpacerMinimum = 8
+                statusIconFontSize = 10
+                statusIconTrailingPadding = 4
+                attachmentSpacing = 2
+                attachmentTrailingPadding = 6
+                timeFontSize = 11
+                avatarFontSize = 9
+                avatarSize = 18
+                avatarLeadingPadding = 8
+                selectionAccessoryFontSize = 14
+                selectionAccessoryLeadingPadding = 8
+                rowHorizontalPadding = 16
+                rowVerticalPadding = 8
+            case .comfortable:
+                unreadIndicatorTrailingPadding = 10
+                starFontSize = 12
+                starFrame = 18
+                starTrailingPadding = 12
+                participantFontSize = 14
+                participantWidth = 174
+                labelsHorizontalPadding = 10
+                labelOverflowFontSize = 10
+                subjectSnippetSpacing = 7
+                subjectFontSize = 14
+                separatorFontSize = 13
+                snippetFontSize = 13
+                trailingSpacerMinimum = 10
+                statusIconFontSize = 11
+                statusIconTrailingPadding = 5
+                attachmentSpacing = 3
+                attachmentTrailingPadding = 8
+                timeFontSize = 12
+                avatarFontSize = 10
+                avatarSize = 20
+                avatarLeadingPadding = 10
+                selectionAccessoryFontSize = 15
+                selectionAccessoryLeadingPadding = 10
+                rowHorizontalPadding = 16
+                rowVerticalPadding = 11
+            }
+        }
     }
 
     private static let shortDateFormatter: DateFormatter = {

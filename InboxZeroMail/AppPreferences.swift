@@ -1,4 +1,5 @@
 import Foundation
+import DesignSystem
 import MailCore
 
 enum AppPreferences {
@@ -16,6 +17,8 @@ enum AppPreferences {
     static let splitInboxItemsKey = "preferences.splitInboxItems"
     static let splitInboxTabsVersionKey = "preferences.splitInboxTabs.version"
     static let defaultSplitInboxItems: [SplitInboxItem] = SplitInboxItem.defaultItems
+    static let threadRowDensityKey = "preferences.threadRowDensity"
+    static let defaultThreadRowDensity: ThreadRowDensity = .comfortable
 
     static let accountAvatarColorsVersionKey = "preferences.accountAvatarColors.version"
     static let accountAvatarColorOptions = [
@@ -95,6 +98,14 @@ enum AppPreferences {
 
     static func accountAvatarColorName(for hex: String) -> String {
         accountAvatarColorOptions.first(where: { $0.hex == hex.uppercased() })?.name ?? "Custom"
+    }
+
+    static func threadRowDensity(defaults: UserDefaults = .standard) -> ThreadRowDensity {
+        guard let rawValue = defaults.string(forKey: threadRowDensityKey),
+              let density = ThreadRowDensity(rawValue: rawValue) else {
+            return defaultThreadRowDensity
+        }
+        return density
     }
 
     static func configuredSplitInboxItems(defaults: UserDefaults = .standard) -> [SplitInboxItem] {
