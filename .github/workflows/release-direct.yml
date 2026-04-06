@@ -14,6 +14,7 @@ jobs:
     env:
       APP_BUNDLE_NAME: Inbox Zero
       APP_DISPLAY_NAME: Inbox Zero
+      RELEASE_ARTIFACT_PREFIX: Inbox-Zero
       SPARKLE_VERSION: 2.9.1
       XCODE_PROJECT: InboxZeroMail.xcodeproj
       XCODE_SCHEME: InboxZeroMail
@@ -99,8 +100,8 @@ jobs:
           app_path="$archive_path/Products/Applications/${APP_BUNDLE_NAME}.app"
           sparkle_framework_path="$app_path/Contents/Frameworks/Sparkle.framework"
           version="${GITHUB_REF_NAME#v}"
-          unstapled_zip="$RUNNER_TEMP/${APP_BUNDLE_NAME} ${version} Unstapled.zip"
-          final_zip="$RUNNER_TEMP/${APP_BUNDLE_NAME} ${version}.zip"
+          unstapled_zip="$RUNNER_TEMP/${RELEASE_ARTIFACT_PREFIX}-${version}-unstapled.zip"
+          final_zip="$RUNNER_TEMP/${RELEASE_ARTIFACT_PREFIX}-${version}.zip"
           notary_key_path="$RUNNER_TEMP/notary/AuthKey_${APPLE_API_KEY_ID}.p8"
           signing_identity="Developer ID Application"
 
