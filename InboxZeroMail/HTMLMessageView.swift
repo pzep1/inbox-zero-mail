@@ -296,8 +296,21 @@ fileprivate final class NonScrollingWebView: WKWebView {
 struct HTMLMessageView: NSViewRepresentable {
     let htmlBody: String
     let allowsRemoteContent: Bool
+    let showsQuotedContent: Bool
 
     @Binding var contentHeight: CGFloat
+
+    init(
+        htmlBody: String,
+        allowsRemoteContent: Bool,
+        showsQuotedContent: Bool = true,
+        contentHeight: Binding<CGFloat>
+    ) {
+        self.htmlBody = htmlBody
+        self.allowsRemoteContent = allowsRemoteContent
+        self.showsQuotedContent = showsQuotedContent
+        _contentHeight = contentHeight
+    }
 
     func makeCoordinator() -> Coordinator {
         Coordinator(parent: self)
@@ -361,6 +374,19 @@ struct HTMLMessageView: NSViewRepresentable {
             allowsRemoteContent: allowsRemoteContent,
             imageProxy: imageProxy
         )
+        let quotedContentStyles = showsQuotedContent ? "" : """
+            blockquote,
+            .gmail_quote,
+            .gmail_extra,
+            .yahoo_quoted,
+            .protonmail_quote,
+            .moz-cite-prefix,
+            [type="cite"],
+            #divRplyFwdMsg,
+            #replySplit {
+                display: none !important;
+            }
+        """
 
         return """
         <!DOCTYPE html>
@@ -398,6 +424,7 @@ struct HTMLMessageView: NSViewRepresentable {
                 padding: 4px 12px;
                 color: #72747e;
             }
+            \(quotedContentStyles)
             pre, code {
                 font-family: "SF Mono", Menlo, monospace;
                 font-size: 12px;
@@ -461,6 +488,24 @@ struct HTMLMessageView: NSViewRepresentable {
             }
         }
     }
+}
+
+enum HTMLQuotedContentDetector {
+    static func containsQuotedContent(_ html: String) -> Bool {
+        quotedContentPatterns.contains { pattern in
+            html.range(of: pattern, options: .regularExpression) != nil
+        }
+    }
+
+    private static let quotedContentPatterns = [
+        #"(?is)<blockquote\b"#,
+        #"(?is)class\s*=\s*(["'])[^"']*gmail_quote[^"']*\1"#,
+        #"(?is)class\s*=\s*(["'])[^"']*gmail_extra[^"']*\1"#,
+        #"(?is)class\s*=\s*(["'])[^"']*(yahoo_quoted|protonmail_quote|moz-cite-prefix)[^"']*\1"#,
+        #"(?is)type\s*=\s*(["'])cite\1"#,
+        #"(?is)id\s*=\s*(["'])divRplyFwdMsg\1"#,
+        #"(?is)id\s*=\s*(["'])replySplit\1"#,
+    ]
 }
 
 /// Plain text email renderer with linkification

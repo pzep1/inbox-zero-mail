@@ -165,6 +165,47 @@ private enum AttachmentFileCoordinator {
     }
 }
 
+struct PlainTextQuotedContent: Equatable {
+    let visibleText: String
+    let quotedText: String?
+}
+
+enum MessagePresentationRules {
+    static func startsExpanded(message: MailMessage, isLastMessage: Bool) -> Bool {
+        isLastMessage || !message.isRead
+    }
+
+    static func splitPlainTextQuotedContent(_ text: String) -> PlainTextQuotedContent {
+        guard let quoteStart = firstQuotedSectionStart(in: text) else {
+            return PlainTextQuotedContent(visibleText: text, quotedText: nil)
+        }
+
+        let visibleText = String(text[..<quoteStart]).trimmingCharacters(in: .whitespacesAndNewlines)
+        let quotedText = String(text[quoteStart...]).trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard visibleText.isEmpty == false, quotedText.isEmpty == false else {
+            return PlainTextQuotedContent(visibleText: text, quotedText: nil)
+        }
+
+        return PlainTextQuotedContent(visibleText: visibleText, quotedText: quotedText)
+    }
+
+    private static func firstQuotedSectionStart(in text: String) -> String.Index? {
+        let patterns = [
+            #"(?m)^On .+wrote:\s*$"#,
+            #"(?m)^>.*$"#,
+            #"(?m)^-{2,}\s*Original Message\s*-{2,}\s*$"#,
+            #"(?m)^-{2,}\s*Forwarded message\s*-{2,}\s*$"#,
+        ]
+
+        return patterns
+            .compactMap { pattern in
+                text.range(of: pattern, options: .regularExpression)?.lowerBound
+            }
+            .min()
+    }
+}
+
 struct ContentView: View {
     @Bindable var model: WindowModel
     @State private var showShortcuts = false
@@ -2134,8 +2175,16 @@ private struct ThreadDetailPane: View {
                             .padding(.bottom, 16)
 
                             // Messages
+                            let lastMessageID = detail.messages.last?.id
                             ForEach(detail.messages) { message in
-                                MessageView(model: model, message: message)
+                                MessageView(
+                                    model: model,
+                                    message: message,
+                                    startsExpanded: MessagePresentationRules.startsExpanded(
+                                        message: message,
+                                        isLastMessage: message.id == lastMessageID
+                                    )
+                                )
                             }
 
                             // Inline compose (below messages)
@@ -2242,6 +2291,9 @@ private struct ActionButton: View {
 private struct MessageView: View {
     let model: WindowModel
     let message: MailMessage
+    let startsExpanded: Bool
+    @State private var isExpanded: Bool
+    @State private var showsQuotedContent = false
     @State private var htmlContentHeight: CGFloat = 100
     @State private var openingAttachmentIDs: Set<String> = []
     @State private var downloadingAttachmentIDs: Set<String> = []
@@ -2250,6 +2302,25 @@ private struct MessageView: View {
 
     private var isDraft: Bool {
         message.mailboxRefs.contains { $0.systemRole == .draft }
+    }
+
+    private var plainTextContent: PlainTextQuotedContent? {
+        guard let plainBody = message.plainBody, plainBody.isEmpty == false else { return nil }
+        return MessagePresentationRules.splitPlainTextQuotedContent(plainBody)
+    }
+
+    private var hasQuotedContent: Bool {
+        if let htmlBody = message.htmlBody, htmlBody.isEmpty == false {
+            return HTMLQuotedContentDetector.containsQuotedContent(htmlBody)
+        }
+        return plainTextContent?.quotedText != nil
+    }
+
+    init(model: WindowModel, message: MailMessage, startsExpanded: Bool) {
+        self.model = model
+        self.message = message
+        self.startsExpanded = startsExpanded
+        _isExpanded = State(initialValue: startsExpanded)
     }
 
     var body: some View {
@@ -2272,7 +2343,7 @@ private struct MessageView: View {
                         HStack {
                             Text(isDraft ? "Draft" : message.sender.displayName)
                                 .font(.system(size: 13, weight: .semibold))
-                                .foregroundStyle(isDraft ? .orange : MailDesignTokens.textPrimary)
+                                .foregroundStyle(isDraft ? .orange : (message.isRead ? MailDesignTokens.textPrimary : MailDesignTokens.accent))
                             if isDraft {
                                 Text("DRAFT")
                                     .font(.system(size: 9, weight: .bold))
@@ -2283,9 +2354,23 @@ private struct MessageView: View {
                                     .clipShape(Capsule())
                             }
                             Spacer()
-                            Text(MessageDetailTimestampFormatter.string(for: message.receivedAt ?? message.sentAt ?? .now))
-                                .font(.system(size: 11))
-                                .foregroundStyle(MailDesignTokens.textTertiary)
+                            HStack(spacing: 8) {
+                                Text(MessageDetailTimestampFormatter.string(for: message.receivedAt ?? message.sentAt ?? .now))
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(MailDesignTokens.textTertiary)
+
+                                Button {
+                                    withAnimation(.easeInOut(duration: 0.16)) {
+                                        isExpanded.toggle()
+                                    }
+                                } label: {
+                                    Image(systemName: isExpanded ? "chevron.up.circle.fill" : "chevron.down.circle.fill")
+                                        .font(.system(size: 14))
+                                        .foregroundStyle(MailDesignTokens.textTertiary)
+                                }
+                                .buttonStyle(.plain)
+                                .plainButtonHitArea()
+                            }
                         }
                         if !isDraft {
                             Text(message.sender.emailAddress)
@@ -2298,27 +2383,50 @@ private struct MessageView: View {
                                 .font(.system(size: 11))
                                 .foregroundStyle(MailDesignTokens.textTertiary)
                         }
+
+                        if !isExpanded, message.snippet.isEmpty == false {
+                            Text(message.snippet)
+                                .font(.system(size: 13))
+                                .foregroundStyle(MailDesignTokens.textSecondary)
+                                .lineLimit(2)
+                                .padding(.top, 6)
+                        }
                     }
                 }
 
                 // Message body
-                if let htmlBody = message.htmlBody, htmlBody.isEmpty == false {
-                    HTMLMessageView(
-                        htmlBody: htmlBody,
-                        allowsRemoteContent: loadRemoteImagesAutomatically,
-                        contentHeight: $htmlContentHeight
-                    )
-                    .frame(height: htmlContentHeight)
-                } else if let plainBody = message.plainBody, plainBody.isEmpty == false {
-                    PlainTextMessageView(text: plainBody)
-                } else {
-                    Text(message.snippet)
-                        .font(.system(size: 13))
-                        .foregroundStyle(MailDesignTokens.textSecondary)
+                if isExpanded {
+                    if let htmlBody = message.htmlBody, htmlBody.isEmpty == false {
+                        HTMLMessageView(
+                            htmlBody: htmlBody,
+                            allowsRemoteContent: loadRemoteImagesAutomatically,
+                            showsQuotedContent: showsQuotedContent,
+                            contentHeight: $htmlContentHeight
+                        )
+                        .frame(height: htmlContentHeight)
+                    } else if let plainTextContent {
+                        PlainTextMessageView(text: showsQuotedContent ? message.plainBody ?? plainTextContent.visibleText : plainTextContent.visibleText)
+                    } else {
+                        Text(message.snippet)
+                            .font(.system(size: 13))
+                            .foregroundStyle(MailDesignTokens.textSecondary)
+                    }
+
+                    if hasQuotedContent {
+                        Button(showsQuotedContent ? "Hide quoted text" : "Show quoted text") {
+                            withAnimation(.easeInOut(duration: 0.16)) {
+                                showsQuotedContent.toggle()
+                            }
+                        }
+                        .buttonStyle(.plain)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(MailDesignTokens.accent)
+                        .plainButtonHitArea()
+                    }
                 }
 
                 // Attachments
-                if !message.attachments.isEmpty {
+                if isExpanded, !message.attachments.isEmpty {
                     LazyVGrid(
                         columns: [GridItem(.adaptive(minimum: 220, maximum: 300), spacing: 14, alignment: .top)],
                         alignment: .leading,
