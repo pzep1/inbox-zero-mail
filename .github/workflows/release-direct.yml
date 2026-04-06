@@ -12,7 +12,7 @@ jobs:
   release:
     runs-on: macos-26
     env:
-      APP_NAME: InboxZeroMail
+      APP_BUNDLE_NAME: Inbox Zero
       APP_DISPLAY_NAME: Inbox Zero
       SPARKLE_VERSION: 2.9.1
       XCODE_PROJECT: InboxZeroMail.xcodeproj
@@ -71,7 +71,7 @@ jobs:
           SPARKLE_PUBLIC_ED_KEY: ${{ secrets.SPARKLE_PUBLIC_ED_KEY }}
         run: |
           set -euo pipefail
-          archive_path="$RUNNER_TEMP/${APP_NAME}.xcarchive"
+          archive_path="$RUNNER_TEMP/${XCODE_SCHEME}.xcarchive"
           xcodebuild archive \
             -project "$XCODE_PROJECT" \
             -scheme "$XCODE_SCHEME" \
@@ -95,12 +95,12 @@ jobs:
           APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
         run: |
           set -euo pipefail
-          archive_path="$RUNNER_TEMP/${APP_NAME}.xcarchive"
-          app_path="$archive_path/Products/Applications/${APP_NAME}.app"
+          archive_path="$RUNNER_TEMP/${XCODE_SCHEME}.xcarchive"
+          app_path="$archive_path/Products/Applications/${APP_BUNDLE_NAME}.app"
           sparkle_framework_path="$app_path/Contents/Frameworks/Sparkle.framework"
           version="${GITHUB_REF_NAME#v}"
-          unstapled_zip="$RUNNER_TEMP/${APP_NAME}-${version}-unstapled.zip"
-          final_zip="$RUNNER_TEMP/${APP_NAME}-${version}.zip"
+          unstapled_zip="$RUNNER_TEMP/${APP_BUNDLE_NAME} ${version} Unstapled.zip"
+          final_zip="$RUNNER_TEMP/${APP_BUNDLE_NAME} ${version}.zip"
           notary_key_path="$RUNNER_TEMP/notary/AuthKey_${APPLE_API_KEY_ID}.p8"
           signing_identity="Developer ID Application"
 
@@ -167,9 +167,8 @@ jobs:
           archives_dir="$RUNNER_TEMP/appcast-archives"
           mkdir -p "$archives_dir"
 
-          archive_basename="${APP_DISPLAY_NAME} ${version}.zip"
           release_notes_basename="${APP_DISPLAY_NAME} ${version}.md"
-          cp "$FINAL_ZIP" "$archives_dir/$archive_basename"
+          cp "$FINAL_ZIP" "$archives_dir/"
 
           if [[ -f "release-notes/${GITHUB_REF_NAME}.md" ]]; then
             cp "release-notes/${GITHUB_REF_NAME}.md" "$archives_dir/$release_notes_basename"
