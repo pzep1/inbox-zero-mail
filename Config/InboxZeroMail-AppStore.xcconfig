@@ -1,0 +1,7 @@
+#include "InboxZeroMail.xcconfig"
+
+// App Store builds must not ship Sparkle or direct-update configuration.
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) APP_STORE
+SPARKLE_APPCAST_URL =
+SPARKLE_PUBLIC_ED_KEY =
+

@@ -1,10 +1,13 @@
 import AppKit
-import AppUpdates
 import DesignSystem
 import MailCore
 import MailData
 import MailFeatures
 import SwiftUI
+
+#if canImport(AppUpdates) && !APP_STORE
+import AppUpdates
+#endif
 
 // MARK: - FocusedValue for per-window commands
 

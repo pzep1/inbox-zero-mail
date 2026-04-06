@@ -1,7 +1,10 @@
-import AppUpdates
 import MailCore
 import MailFeatures
 import SwiftUI
+
+#if canImport(AppUpdates) && !APP_STORE
+import AppUpdates
+#endif
 
 struct MailAppCommands: Commands {
     let store: MailAppStore
@@ -10,10 +13,12 @@ struct MailAppCommands: Commands {
 
     var body: some Commands {
         CommandGroup(after: .appInfo) {
+#if !APP_STORE
             Button("Check for Updates…") {
                 updater.checkForUpdates()
             }
             .disabled(updater.canCheckForUpdates == false)
+#endif
         }
 
         // Let macOS provide the default "New Window" (Cmd+N) for WindowGroup.
