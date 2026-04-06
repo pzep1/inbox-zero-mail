@@ -413,6 +413,77 @@ struct InboxZeroMailTests {
         )
     }
 
+    @Test
+    func htmlQuotedContentDetectorFindsCommonQuotedMarkup() {
+        let html = """
+        <p>Latest update</p>
+        <div class="gmail_quote">
+            <blockquote>Older thread</blockquote>
+        </div>
+        """
+
+        #expect(HTMLQuotedContentDetector.containsQuotedContent(html))
+    }
+
+    @Test
+    func plainTextQuotedContentSplitsReplyChain() {
+        let text = """
+        Shipping update
+
+        On Mon, Apr 6, 2026 at 9:00 AM Alex wrote:
+        > Previous reply
+        > More history
+        """
+
+        let content = MessagePresentationRules.splitPlainTextQuotedContent(text)
+
+        #expect(content.visibleText == "Shipping update")
+        #expect(content.quotedText?.contains("Alex wrote:") == true)
+    }
+
+    @Test
+    func plainTextQuotedContentKeepsBodyWhenOnlyQuoteExists() {
+        let text = """
+        > Previous reply
+        > More history
+        """
+
+        let content = MessagePresentationRules.splitPlainTextQuotedContent(text)
+
+        #expect(content.visibleText == text)
+        #expect(content.quotedText == nil)
+    }
+
+    @Test
+    func messagePresentationStartsExpandedOnlyForUnreadOrFinalMessage() {
+        let account = makeAccount(id: "gmail:visibility@example.com", email: "visibility@example.com", name: "Visibility Tester")
+        let threadID = MailThreadID(accountID: account.id, providerThreadID: "thread-visibility")
+        let readMessage = MailMessage(
+            id: MailMessageID(accountID: account.id, providerMessageID: "message-read"),
+            threadID: threadID,
+            accountID: account.id,
+            providerMessageID: "message-read",
+            sender: MailParticipant(name: "Alex", emailAddress: "alex@example.com"),
+            snippet: "Read body",
+            isRead: true,
+            isOutgoing: false
+        )
+        let unreadMessage = MailMessage(
+            id: MailMessageID(accountID: account.id, providerMessageID: "message-unread"),
+            threadID: threadID,
+            accountID: account.id,
+            providerMessageID: "message-unread",
+            sender: MailParticipant(name: "Alex", emailAddress: "alex@example.com"),
+            snippet: "Unread body",
+            isRead: false,
+            isOutgoing: false
+        )
+
+        #expect(MessagePresentationRules.startsExpanded(message: readMessage, isLastMessage: false) == false)
+        #expect(MessagePresentationRules.startsExpanded(message: readMessage, isLastMessage: true))
+        #expect(MessagePresentationRules.startsExpanded(message: unreadMessage, isLastMessage: false))
+    }
+
     private func makeAccount(id: String, email: String, name: String) -> MailAccount {
         MailAccount(
             id: MailAccountID(rawValue: id),
