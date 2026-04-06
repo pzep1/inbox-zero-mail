@@ -1,7 +1,9 @@
+import CryptoKit
 import Foundation
 
 struct ImageProxyConfiguration: Equatable {
     let baseURL: URL
+    let signingSecret: String?
 
     var origin: String {
         guard var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false) else {
@@ -19,26 +21,43 @@ struct ImageProxyConfiguration: Equatable {
         return origin
     }
 
-    static func resolve(environment: [String: String] = ProcessInfo.processInfo.environment) -> ImageProxyConfiguration? {
+    static func resolve(
+        environment: [String: String] = ProcessInfo.processInfo.environment,
+        infoDictionary: [String: Any]? = nil
+    ) -> ImageProxyConfiguration? {
+        let bundleInfo = infoDictionary ?? Bundle.main.infoDictionary ?? [:]
         let rawValue = trimmedEnvironmentValue(
             for: "INBOX_ZERO_IMAGE_PROXY_BASE_URL",
             environment: environment
         ) ?? trimmedEnvironmentValue(
             for: "NEXT_PUBLIC_IMAGE_PROXY_BASE_URL",
             environment: environment
+        ) ?? resolvedBundleSettingValue(
+            for: "InboxZeroImageProxyBaseURL",
+            infoDictionary: bundleInfo
+        )
+        let signingSecret = trimmedEnvironmentValue(
+            for: "INBOX_ZERO_IMAGE_PROXY_SIGNING_SECRET",
+            environment: environment
+        ) ?? trimmedEnvironmentValue(
+            for: "IMAGE_PROXY_SIGNING_SECRET",
+            environment: environment
+        ) ?? resolvedBundleSettingValue(
+            for: "InboxZeroImageProxySigningSecret",
+            infoDictionary: bundleInfo
         )
 
         if let rawValue {
             if disabledEnvironmentValues.contains(rawValue.lowercased()) {
                 return nil
             }
-            return normalized(from: rawValue)
+            return normalized(from: rawValue, signingSecret: signingSecret)
         }
 
-        return normalized(from: "img.getinboxzero.com")
+        return normalized(from: "img.getinboxzero.com", signingSecret: signingSecret)
     }
 
-    static func normalized(from rawValue: String) -> ImageProxyConfiguration? {
+    static func normalized(from rawValue: String, signingSecret: String? = nil) -> ImageProxyConfiguration? {
         let trimmed = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
         guard trimmed.isEmpty == false else { return nil }
 
@@ -57,10 +76,13 @@ struct ImageProxyConfiguration: Equatable {
         }
 
         guard let normalizedURL = components.url else { return nil }
-        return ImageProxyConfiguration(baseURL: normalizedURL)
+        return ImageProxyConfiguration(
+            baseURL: normalizedURL,
+            signingSecret: trimmedSigningSecret(signingSecret)
+        )
     }
 
-    func proxiedAssetURL(for assetURLString: String) -> String {
+    func proxiedAssetURL(for assetURLString: String, now: Date = Date()) -> String {
         let trimmedValue = assetURLString.trimmingCharacters(in: .whitespacesAndNewlines)
         let decodedAssetURL = decodeHTMLURLValue(trimmedValue)
 
@@ -88,6 +110,18 @@ struct ImageProxyConfiguration: Equatable {
         }
 
         queryComponents.append("u=\(encodedAssetURL)")
+
+        if let signingSecret {
+            let expiresAt = ImageProxyConfiguration.expiresAt(now: now)
+            let signature = signAssetProxyRequest(
+                assetURL: decodedAssetURL,
+                expiresAt: expiresAt,
+                signingSecret: signingSecret
+            )
+            queryComponents.append("e=\(expiresAt)")
+            queryComponents.append("s=\(signature)")
+        }
+
         proxyComponents.percentEncodedQuery = queryComponents.joined(separator: "&")
 
         return proxyComponents.url?.absoluteString ?? assetURLString
@@ -116,6 +150,41 @@ struct ImageProxyConfiguration: Equatable {
         return value
     }
 
+    private static func resolvedBundleSettingValue(
+        for key: String,
+        infoDictionary: [String: Any]
+    ) -> String? {
+        guard let value = infoDictionary[key] as? String else { return nil }
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.isEmpty == false else { return nil }
+        guard trimmed.hasPrefix("$(") == false else { return nil }
+        return trimmed
+    }
+
+    private static func trimmedSigningSecret(_ value: String?) -> String? {
+        guard let value else { return nil }
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
+    private static func expiresAt(now: Date) -> Int {
+        Int(floor(now.timeIntervalSince1970)) + defaultSignedAssetProxyTTLSeconds
+    }
+
+    private func signAssetProxyRequest(
+        assetURL: String,
+        expiresAt: Int,
+        signingSecret: String
+    ) -> String {
+        let payload = Data("\(expiresAt):\(assetURL)".utf8)
+        let key = SymmetricKey(data: Data(signingSecret.utf8))
+        let signature = HMAC<SHA256>.authenticationCode(for: payload, using: key)
+        return Data(signature).base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
+    }
+
     private static let disabledEnvironmentValues: Set<String> = [
         "0",
         "false",
@@ -123,6 +192,8 @@ struct ImageProxyConfiguration: Equatable {
         "disabled",
         "none",
     ]
+
+    private static let defaultSignedAssetProxyTTLSeconds = 60 * 60 * 24 * 7
 }
 
 private func decodeHTMLURLValue(_ value: String) -> String {

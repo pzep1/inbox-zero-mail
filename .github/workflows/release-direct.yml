@@ -68,6 +68,7 @@ jobs:
         env:
           INBOX_ZERO_GMAIL_CLIENT_ID: ${{ secrets.INBOX_ZERO_GMAIL_CLIENT_ID }}
           INBOX_ZERO_GMAIL_CLIENT_SECRET: ${{ secrets.INBOX_ZERO_GMAIL_CLIENT_SECRET }}
+          INBOX_ZERO_IMAGE_PROXY_SIGNING_SECRET: ${{ secrets.INBOX_ZERO_IMAGE_PROXY_SIGNING_SECRET }}
           SPARKLE_APPCAST_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/appcast.xml
           SPARKLE_PUBLIC_ED_KEY: ${{ secrets.SPARKLE_PUBLIC_ED_KEY }}
         run: |
@@ -86,6 +87,7 @@ jobs:
             CODE_SIGN_IDENTITY="Developer ID Application" \
             INBOX_ZERO_GMAIL_CLIENT_ID="$INBOX_ZERO_GMAIL_CLIENT_ID" \
             INBOX_ZERO_GMAIL_CLIENT_SECRET="$INBOX_ZERO_GMAIL_CLIENT_SECRET" \
+            INBOX_ZERO_IMAGE_PROXY_SIGNING_SECRET="$INBOX_ZERO_IMAGE_PROXY_SIGNING_SECRET" \
             SPARKLE_APPCAST_URL="$SPARKLE_APPCAST_URL" \
             SPARKLE_PUBLIC_ED_KEY="$SPARKLE_PUBLIC_ED_KEY"
 

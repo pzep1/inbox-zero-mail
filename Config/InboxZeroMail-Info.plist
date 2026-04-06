@@ -41,6 +41,10 @@
 	<string>$(INBOX_ZERO_OUTLOOK_CLIENT_ID)</string>
 	<key>InboxZeroOutlookClientSecret</key>
 	<string>$(INBOX_ZERO_OUTLOOK_CLIENT_SECRET)</string>
+	<key>InboxZeroImageProxyBaseURL</key>
+	<string>$(INBOX_ZERO_IMAGE_PROXY_BASE_URL)</string>
+	<key>InboxZeroImageProxySigningSecret</key>
+	<string>$(INBOX_ZERO_IMAGE_PROXY_SIGNING_SECRET)</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
 	<key>SUAllowsAutomaticUpdates</key>

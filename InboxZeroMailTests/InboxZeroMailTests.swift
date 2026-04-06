@@ -239,6 +239,7 @@ struct InboxZeroMailTests {
         let configuration = try! #require(ImageProxyConfiguration.resolve(environment: [:]))
 
         #expect(configuration.baseURL == URL(string: "https://img.getinboxzero.com/proxy")!)
+        #expect(configuration.signingSecret == nil)
     }
 
     @Test
@@ -268,6 +269,48 @@ struct InboxZeroMailTests {
 
         #expect(configuration.baseURL == URL(string: "https://img.example.com/custom-proxy")!)
         #expect(configuration.origin == "https://img.example.com")
+    }
+
+    @Test
+    func imageProxyConfigurationAcceptsSharedSigningSecretEnvironmentVariableName() {
+        let configuration = try! #require(ImageProxyConfiguration.resolve(environment: [
+            "IMAGE_PROXY_SIGNING_SECRET": "test-signing-secret",
+        ]))
+
+        #expect(configuration.signingSecret == "test-signing-secret")
+    }
+
+    @Test
+    func imageProxyConfigurationAlsoReadsBundleSettings() {
+        let configuration = try! #require(ImageProxyConfiguration.resolve(
+            environment: [:],
+            infoDictionary: [
+                "InboxZeroImageProxyBaseURL": "https://img.example.com/custom-proxy",
+                "InboxZeroImageProxySigningSecret": "bundle-signing-secret",
+            ]
+        ))
+
+        #expect(configuration.baseURL == URL(string: "https://img.example.com/custom-proxy")!)
+        #expect(configuration.signingSecret == "bundle-signing-secret")
+    }
+
+    @Test
+    func imageProxyConfigurationBuildsSignedProxyURLsThatMatchWebAppContract() {
+        let configuration = try! #require(ImageProxyConfiguration.normalized(
+            from: "https://img.example.com/proxy",
+            signingSecret: "test-signing-secret"
+        ))
+
+        let proxyURL = URL(string: configuration.proxiedAssetURL(
+            for: "https://cdn.example.com/image.png?size=large",
+            now: Date(timeIntervalSince1970: 1_775_124_000)
+        ))!
+        let components = URLComponents(url: proxyURL, resolvingAgainstBaseURL: false)!
+        let queryItems = Dictionary(uniqueKeysWithValues: (components.queryItems ?? []).map { ($0.name, $0.value ?? "") })
+
+        #expect(queryItems["u"] == "https://cdn.example.com/image.png?size=large")
+        #expect(queryItems["e"] == "1775124300")
+        #expect(queryItems["s"] == "JATn8hmgf_0zitefD9AmiPrqSr9NuTuh1tKPXKSrPAA")
     }
 
     @Test

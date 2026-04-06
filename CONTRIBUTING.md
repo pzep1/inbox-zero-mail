@@ -62,7 +62,9 @@ Useful environment variables in Xcode:
 - `INBOX_ZERO_AUTOCONNECT_GMAIL=1`
 - Remote email images default to `img.getinboxzero.com`.
 - `INBOX_ZERO_IMAGE_PROXY_BASE_URL=https://img.example.com/proxy` overrides the default privacy proxy. Host-only values like `img.getinboxzero.com` are normalized to `https://img.getinboxzero.com/proxy`.
+- `INBOX_ZERO_IMAGE_PROXY_SIGNING_SECRET=...` makes the macOS client emit the same signed `?u=...&e=...&s=...` proxy URLs as the web app. `IMAGE_PROXY_SIGNING_SECRET` is also accepted for CI/shared environment compatibility.
 - `INBOX_ZERO_IMAGE_PROXY_BASE_URL=off` disables proxying and falls back to direct remote image loads when that preference is enabled.
+- If you embed an image-proxy signing secret into a distributed desktop build, users can extract it. Prefer a desktop-specific low-trust proxy secret or a proxy mode designed for public clients.
 
 ## OAuth Setup
 
