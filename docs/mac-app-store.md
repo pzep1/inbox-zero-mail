@@ -28,9 +28,12 @@ signing identities:
 2. Point the new target at:
    - `Config/InboxZeroMail-AppStore.xcconfig`
    - `Config/InboxZeroMail-AppStore-Info.plist`
+   - `InboxZeroMail/InboxZeroMail-AppStore.entitlements`
 3. Remove the `AppUpdates` package product from the App Store target’s linked
    frameworks / package dependencies.
 4. Keep sandbox entitlements on and tighten them further if review requires it.
+   The direct-download entitlements now include Sparkle sandbox exceptions and
+   should not be reused for the App Store target.
 5. Give the App Store target its own bundle identifier.
 6. Create a matching App Store Connect app record.
 7. Archive the App Store target with:
