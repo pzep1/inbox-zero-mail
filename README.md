@@ -60,7 +60,14 @@ Most modern email clients are Electron apps that eat 2 GB of RAM just to show yo
 
 ### Download
 
-Download the latest release from [GitHub Releases](../../releases).
+Download the latest macOS release:
+
+[Download Inbox Zero for macOS](../../releases/latest)
+
+On the release page, download `Inbox-Zero-*.zip`, unzip it, and move
+`Inbox Zero.app` to your Applications folder.
+
+Requires macOS 14+ on Apple Silicon.
 
 ### Build from Source
 
